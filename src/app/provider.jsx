@@ -5,6 +5,7 @@ import { config } from "../lib/wagmi";
 import { WagmiProvider } from 'wagmi';
 import RecoilProvider from '../userstate/RecoilProvider';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { MiniKitContextProvider } from '../providers/MiniKitProvider';
 import { base, baseSepolia } from 'wagmi/chains';
 
 const queryClient = new QueryClient();
@@ -27,7 +28,9 @@ export function Providers({ children }) {
               },
             }}
           >
-            {children}
+            <MiniKitContextProvider>
+              {children}
+            </MiniKitContextProvider>
           </OnchainKitProvider>
         </RecoilProvider>
       </WagmiProvider>
