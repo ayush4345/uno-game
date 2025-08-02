@@ -2,8 +2,22 @@ import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   // Return a 307 temporary redirect to the Farcaster Hosted Manifest URL
-  return Response.redirect(
-    'https://api.farcaster.xyz/miniapps/hosted-manifest/019869c1-86c6-2e9f-b9ff-a34ba3f8baaa',
-    307
-  );
+  return {
+    "frame": {
+      "name": "Zunno",
+      "homeUrl": "https://uno-game-pi.vercel.app",
+      "iconUrl": "https://uno-game-pi.vercel.app/logo.jpg",
+      "version": "1",
+      "subtitle": "leading game hub",
+      "description": "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
+      "splashImageUrl": "https://uno-game-pi.vercel.app/logo.jpg",
+      "primaryCategory": "games",
+      "splashBackgroundColor": "#75d5e6"
+    },
+    "accountAssociation": {
+          "header": "eyJmaWQiOjExNTA4MjcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1OUM3QkM1ODUxZGFGQUM5ZmY5NWI5M2NGMzRhNTIwMDRFQ2MxREE2In0",
+          "payload": "eyJkb21haW4iOiJ1bm8tZ2FtZS1waS52ZXJjZWwuYXBwIn0",
+          "signature": "MHhiZjVmNjUyZWRkZWU2OWYzYmQ2NWEyYjhjZTAxMDQxMTQ4MDc0NWE5M2JhNzFkYzE1YTAzY2VlYzQyNjQ0ZTA1NWYzYWUzODAxMGY1NjA3NTNjOTViYTZmZTFhOGUxZjI1OWRjNjZiNTVlZTUyYTU0YTc4MWZlMmY4M2VjMjcyYzFi"
+    }
+  }
 }
