@@ -86,7 +86,7 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 items-center w-full">
+    <div className="flex flex-col gap-4 items-center">
       <div className="max-w-xs">
         <Wallet>
             <ConnectWallet
