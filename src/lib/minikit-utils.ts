@@ -36,6 +36,10 @@ export const getMiniKitApiKey = () => {
   return process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY || '';
 };
 
+export const getMiniKitProjectId = () => {
+  return process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_ID || '';
+};
+
 // Check if MiniKit is properly configured
 export const isMiniKitConfigured = () => {
   const apiKey = getMiniKitApiKey();

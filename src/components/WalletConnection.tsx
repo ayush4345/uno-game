@@ -5,6 +5,7 @@ import {
   Wallet,
   WalletDropdown,
   WalletDropdownDisconnect,
+  
 } from "@coinbase/onchainkit/wallet";
 import { Address, Avatar, Name, Identity } from "@coinbase/onchainkit/identity";
 import StyledButton from "@/components/styled-button";
@@ -95,7 +96,7 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
               <Avatar className="h-6 w-6 mr-2" />
               <Name />
             </ConnectWallet>
-          <WalletDropdown>
+          <WalletDropdown className="z-50">
             <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
               <Avatar />
               <Name />

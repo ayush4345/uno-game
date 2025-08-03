@@ -228,10 +228,7 @@ export default function PlayGame() {
                         <div className='relative text-center flex flex-col items-center'>
                             <img src='/login-button-bg.png' />
                             <div className='absolute bottom-4 w-full'>
-                                <WalletConnection onConnect={(address) => {
-                                    console.log('Wallet connected:', address);
-                                    // Address state is automatically updated by Wagmi hooks
-                                }} />
+                                <WalletConnection />
                             </div>
                         </div>
                         : <>

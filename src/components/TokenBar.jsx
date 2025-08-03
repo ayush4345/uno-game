@@ -6,8 +6,12 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar"
 import Link from "next/link";
+import {WalletConnection} from "./WalletConnection";
+import { useAccount } from "wagmi";
 
 export default function TokenInfoBar() {
+    const { address } = useAccount();
+    console.log(address)
 
     return (
         <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3`}>
@@ -18,6 +22,7 @@ export default function TokenInfoBar() {
             </Link>
             <div className="flex gap-4 items-center">
                 <Link href="/play" className="text-white font-semibold text-lg hover:underline p-1 rounded-md cursor-pointer">Play</Link >
+                <WalletConnection/>
                 <Link href="/profile" className="cursor-pointer">
                     <Avatar>
                         <AvatarImage src={`https://api.dicebear.com/8.x/notionists/svg`} alt="@user" />
