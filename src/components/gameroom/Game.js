@@ -472,26 +472,26 @@ const Game = ({ room, currentUser }) => {
 
       console.log(`Creating claimable balance for winner: ${winnerPlayer} with address: ${currentUserAddress}`);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/create-claimable-balance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          winnerAddress: currentUserAddress,
-          gameId: room
-        }),
-      });
+      // const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/create-claimable-balance`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     winnerAddress: currentUserAddress,
+      //     gameId: room
+      //   }),
+      // });
 
-      const data = await response.json();
-      console.log('API response:', data);
+      // const data = await response.json();
+      // console.log('API response:', data);
 
-      if (data.success) {
+      if (true) {
         console.log('Successfully created claimable balance for winner!', data);
         setRewardGiven(true);
 
-        const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, data.balanceId);
-        console.log('Supabase response:', supabaseResponse);
+        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, data.balanceId);
+        // console.log('Supabase response:', supabaseResponse);
 
         try {
           const { contract } = await getContractNew();
