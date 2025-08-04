@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       "description": "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
       "splashImageUrl": "https://uno-game-pi.vercel.app/logo.jpg",
       "primaryCategory": "games",
-      "splashBackgroundColor": "#75d5e6"
+      "splashBackgroundColor": "#0000a8"
     },
     "accountAssociation": {
       "header": "eyJmaWQiOjExNTA4MjcsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1OUM3QkM1ODUxZGFGQUM5ZmY5NWI5M2NGMzRhNTIwMDRFQ2MxREE2In0",
