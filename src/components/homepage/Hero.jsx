@@ -23,13 +23,13 @@ const Hero = () => {
       title: "LEVEL UP NEW",
       subtitle: "EXPERIENCE",
       image: "/images/hero-1.png",
-      logo: "/images/zkuno-logo.png"
+      logo: "/logo.jpg"
     },
     {
       title: "PLAY TO",
       subtitle: "EARN",
       image: "/images/hero-2.png",
-      logo: "/images/zkuno-logo.png"
+      logo: "/logo.jpg"
     },
   ];
 
