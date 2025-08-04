@@ -56,7 +56,7 @@ const Hero = () => {
               height={60}
               className="mb-4 rounded-full"
             />
-            <p className="text-white/80 text-lg">A zk Powered UNO Game on Blockchain</p>
+            <p className="text-white/80 text-lg">A UNO Game on Blockchain</p>
           </div>
 
           <div className="space-y-2">
