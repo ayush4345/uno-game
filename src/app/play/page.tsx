@@ -254,7 +254,7 @@ export default function PlayGame() {
           <div>
             <div>
               <h2 className="mt-3 text-white font-bold text-3xl">Games list</h2>
-              <ScrollArea className="h-[calc(100vh-320px)] mt-3 rounded-2xl border-[1px] shadow-md border-[#000022] bg-white p-4">
+              <ScrollArea className="h-[calc(100vh-320px)] mt-3 rounded-2xl border-[1px] shadow-md border-[#000022] bg-[#b49fc9] p-4">
                 {games.toReversed().map((gameId, index) => (
                   <div
                     key={index}
