@@ -91,7 +91,7 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
         <Wallet>
             <ConnectWallet
               className="bg-[#ff9000] text-xl rounded-3xl text-white group hover:brightness-110 disabled:filter-none inline-block pb-[6px] cursor-pointer select-none overflow-hidden shadow-[0_2px_6px_rgba(0,0,0,0.8)] duration-75 transition-[padding,transform,filter] translate-y-0 active:translate-y-1 disabled:translate-y-0 disabled:pb-[6px] disabled:bg-gray-600 font-extrabold relative px-8 py-2 bg-gradient-to-b from-white/30 to-white/0 group-disabled:opacity-60 before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_bottom,rgba(255,255,255,0.6),rgba(255,255,255,0))]" 
-              disconnectedLabel="Connect Base Wallet"
+              disconnectedLabel="Connect Wallet"
             >
               <Avatar className="h-6 w-6 mr-2" />
               <Name />
