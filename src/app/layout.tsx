@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`bg-cover bg-[url("/bg.png")] ${inter.className}`}>
+      <body className={`bg-cover bg-[url("/bg-2.png")] ${inter.className}`}>
         <Analytics />
         <Providers>
           {children}

@@ -34,7 +34,7 @@ export default function Profile() {
   }, [userAccount, setUserAccount]);
 
   return (
-    <main className="bg-cover bg-[url('/bg.png')] min-h-screen">
+    <main className="bg-cover bg-[url('/bg-2.png')] min-h-screen">
       <div className="container mx-auto py-6 px-4">
         <ProfilePage userAccount={userAccount} connectWallet={connectWallet} isLoading={isLoading} />
       </div>
