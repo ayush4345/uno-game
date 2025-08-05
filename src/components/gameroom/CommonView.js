@@ -25,7 +25,7 @@ const CommonView = ({playedCardsPile, onCardDrawnHandler, isDrawDisabled, onUnoC
         onClick={onUnoClicked}
         style={isUnoDisabled ? {pointerEvents: "none"} : null}
       >
-        UNO
+        ZUNNO
       </button>
     </div>
   );
