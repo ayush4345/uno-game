@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         "https://uno-game-pi.vercel.app/images/screenshot_2.png",
         "https://uno-game-pi.vercel.app/images/screenshot_3.png",
       ],
-      tags: ["UNO", "mini app", "coinbase wallet"],
+      tags: ["UNO","mini-app","base-app"],
       heroImageUrl: "https://uno-game-pi.vercel.app/images/hero-1.png",
       tagline: "UNO game on Blockchain",
       ogTitle: "Zunno",
