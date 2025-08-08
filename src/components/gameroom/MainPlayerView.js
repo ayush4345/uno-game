@@ -25,7 +25,7 @@ const MainPlayerView = ({
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button
-          className='game-button orange'
+          className='game-button red'
           disabled={isSkipButtonDisabled}
           onClick={onSkipButtonHandler}
           style={isSkipButtonDisabled ? { pointerEvents: "none" } : null}
