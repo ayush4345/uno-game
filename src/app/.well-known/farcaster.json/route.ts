@@ -19,19 +19,20 @@ export async function GET(request: NextRequest) {
         "https://uno-game-pi.vercel.app/images/screenshot_2.png",
         "https://uno-game-pi.vercel.app/images/screenshot_3.png",
       ],
-      tags: ["UNO","mini-app","base-app"],
+      tags: ["UNO", "mini-app", "base-app"],
       heroImageUrl: "https://uno-game-pi.vercel.app/images/hero-1.png",
       tagline: "UNO game on Blockchain",
       ogTitle: "Zunno",
-      ogDescription: "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
+      ogDescription:
+        "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
       ogImageUrl: "https://uno-game-pi.vercel.app/images/hero-1.png",
     },
     accountAssociation: {
       header:
-        "",
-      payload: "",
+        "eyJmaWQiOjExNjkwMjQsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1YTM4N2IwOTM1MDZDYjQzQjk2NWU4MTNmY0QyQzc4MTYwODUwMTQ0In0",
+      payload: "eyJkb21haW4iOiJ1bm8tZ2FtZS1waS52ZXJjZWwuYXBwIn0",
       signature:
-        "",
+        "MHg0YTM4ZGEyZWY3ODRiZTBiZmNhYzM4NGVkY2RmOWFiOTM2NWM0NTk4YWVjZGU0YTkyODA0NDYwYWIzMzBlMDQ4NzhmNDZmOTY5MTc0NDU1MDBkM2U5NzZmZDk5ZjY0MjZiNDEwMmUzNTc4NWEyODJiMmE2OTkwYmM4MDczNzk3ZjFi",
     },
   };
 
