@@ -1,16 +1,17 @@
 import React from "react";
+import StyledButton from "../styled-button";
 
 const CommonView = ({playedCardsPile, onCardDrawnHandler, isDrawDisabled, onUnoClicked, isUnoDisabled}) => {
   return (
     <div className='middleInfo'>
-      <button
-        className='game-button'
+      <StyledButton
+        className='bg-green-500'
         disabled={isDrawDisabled}
         onClick={onCardDrawnHandler}
         style={isDrawDisabled ? {pointerEvents: "none"} : null}
       >
         DRAW CARD
-      </button>
+      </StyledButton>
       {playedCardsPile && playedCardsPile.length > 0 && (
         <img
           style={{pointerEvents: "none"}}
@@ -19,14 +20,14 @@ const CommonView = ({playedCardsPile, onCardDrawnHandler, isDrawDisabled, onUnoC
           src={`../assets/cards-front/${playedCardsPile[playedCardsPile.length - 1]}.png`}
         />
       )}
-      <button
-        className='game-button orange'
+      <StyledButton
+        className='bg-orange-500'
         disabled={isUnoDisabled}
         onClick={onUnoClicked}
         style={isUnoDisabled ? {pointerEvents: "none"} : null}
       >
         ZUNNO
-      </button>
+      </StyledButton>
     </div>
   );
 };

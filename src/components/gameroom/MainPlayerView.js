@@ -1,4 +1,5 @@
 import React from "react";
+import StyledButton from "../styled-button";
 
 const MainPlayerView = ({
   turn,
@@ -24,14 +25,14 @@ const MainPlayerView = ({
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <button
-          className='game-button red'
+        <StyledButton
+          className='bg-red-500'
           disabled={isSkipButtonDisabled}
           onClick={onSkipButtonHandler}
           style={isSkipButtonDisabled ? { pointerEvents: "none" } : null}
         >
           Skip
-        </button>
+        </StyledButton>
       </div>
     </>
   );
