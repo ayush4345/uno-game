@@ -3,6 +3,7 @@ import bgMusic from "../../assets/sounds/game-bg-music.mp3";
 import useSound from "use-sound";
 import { useSoundProvider } from "../../context/SoundProvider";
 import Link from "next/link";
+import StyledButton from "../styled-button";
 
 function Header({ roomCode }) {
   const { isSoundMuted, toggleMute } = useSoundProvider();
@@ -17,11 +18,11 @@ function Header({ roomCode }) {
         <h1 className="text-lg font-bold text-white mt-0">Room Code: {roomCode}</h1>
       </div>
       <span>
-        <button className='game-button green' onClick={toggleMute}>
+        <StyledButton className='bg-green-500' onClick={toggleMute}>
           <span className='material-icons'>{isSoundMuted ? "volume_off" : "volume_up"}</span>
-        </button>
-        <button
-          className='game-button green'
+        </StyledButton>
+        <StyledButton
+          className='bg-green-500'
           onClick={() => {
             if (isMusicMuted) playBBgMusic();
             else pause();
@@ -29,7 +30,7 @@ function Header({ roomCode }) {
           }}
         >
           <span className='material-icons'>{isMusicMuted ? "music_off" : "music_note"}</span>
-        </button>
+        </StyledButton>
       </span>
     </div>
   );
