@@ -276,72 +276,52 @@
     0 13px 0 5px #1d4c16, 0 13px 1px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Spinner */
-.loader,
-.loader:before,
-.loader:after {
-  border-radius: 50%;
-  width: 2.5em;
-  height: 2.5em;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  -webkit-animation: load7 1.8s infinite ease-in-out;
-  animation: load7 1.8s infinite ease-in-out;
-}
-
+/* Card Spinner */
 .loader {
-  color: #ffffff;
-  font-size: 5px;
-  margin: 0 50px 0 50px;
   position: relative;
-  text-indent: -9999em;
-  -webkit-transform: translateZ(0);
-  -ms-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-animation-delay: -0.16s;
-  animation-delay: -0.16s;
+  width: 60px;
+  height: 60px;
+  margin: 20px auto;
+  perspective: 800px;
 }
 
 .loader:before,
 .loader:after {
   content: "";
   position: absolute;
-  top: 0;
-}
-
-.loader:before {
-  left: -3.5em;
-  -webkit-animation-delay: -0.32s;
-  animation-delay: -0.32s;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #ff0000, #ff9500, #ffff00, #00ff00, #0000ff, #9500ff);
+  background-size: 600% 600%;
+  animation: cardFlip 3s infinite ease, gradientBg 6s infinite linear;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  backface-visibility: hidden;
 }
 
 .loader:after {
-  left: 3.5em;
+  background: linear-gradient(135deg, #0000a8, #000080);
+  transform: rotateY(180deg);
 }
 
-@-webkit-keyframes load7 {
-
-  0%,
-  80%,
-  100% {
-    box-shadow: 0 2.5em 0 -1.3em;
+@keyframes cardFlip {
+  0%, 100% {
+    transform: rotateY(0deg);
   }
-
-  40% {
-    box-shadow: 0 2.5em 0 0;
+  50% {
+    transform: rotateY(180deg);
   }
 }
 
-@keyframes load7 {
-
-  0%,
-  80%,
-  100% {
-    box-shadow: 0 2.5em 0 -1.3em;
+@keyframes gradientBg {
+  0% {
+    background-position: 0% 50%;
   }
-
-  40% {
-    box-shadow: 0 2.5em 0 0;
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
