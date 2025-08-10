@@ -27,11 +27,13 @@ export async function GET(request: NextRequest) {
         "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
       ogImageUrl: "https://zunno.xyz/images/hero-1.png",
     },
+    
   accountAssociation: {
     header: "eyJmaWQiOjExNjkwMjQsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1YTM4N2IwOTM1MDZDYjQzQjk2NWU4MTNmY0QyQzc4MTYwODUwMTQ0In0",
     payload: "eyJkb21haW4iOiJ6dW5uby54eXoifQ",
     signature: "MHg1OTdjYzRmYWNjZjA5ZGI2MzJiZTBiYzBmZGJjZTE0NTIzZjQyMGIwZTIzNmEyOTAzODU1ZDlhNDg5NGE1OTcxMjY2MzUyYzNmODE0ZTYxNGQwZWMwZTI2NDI0NTdlZjdiZDI0ODlhMGU3YmZmMGQ1MWUyYTEzMWE5ZmNhNDAzYjFj"
   }
+
   };
 
   return Response.json(manifest, {
