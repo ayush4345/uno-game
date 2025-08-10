@@ -99,11 +99,11 @@ const Game = ({ room, currentUser }) => {
     //shuffle PACK_OF_CARDS array
     const shuffledCards = shuffleArray(PACK_OF_CARDS);
 
-    //extract first 7 elements to player1Deck
-    const player1Deck = shuffledCards.splice(0, 7);
+    //extract first 5 elements to player1Deck
+    const player1Deck = shuffledCards.splice(0, 5);
 
-    //extract first 7 elements to player2Deck
-    const player2Deck = shuffledCards.splice(0, 7);
+    //extract first 5 elements to player2Deck
+    const player2Deck = shuffledCards.splice(0, 5);
 
     //extract random card from shuffledCards and check if its not an action card
     //108-14=94
