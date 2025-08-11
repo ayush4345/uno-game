@@ -14,7 +14,7 @@ export default function TokenInfoBar() {
     console.log(address)
 
     return (
-        <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3`}>
+        <div className={`w-[100%] xl:max-w-[1280px] flex justify-between items-center mx-auto pt-5 px-3 bg-[#b49fc9]`}>
             <Link href="/">
                 <h2 className="font-extrabold text-[24px] text-white cursor-pointer">
                     Zunno
