@@ -11,6 +11,7 @@
   "dependencies": {
     "@base-org/account": "^1.1.1",
     "@base-org/account-ui": "^1.0.1",
+    "@campnetwork/origin": "^0.0.17",
     "@coinbase/onchainkit": "^0.38.17",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",

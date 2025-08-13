@@ -14,6 +14,9 @@ importers:
       '@base-org/account-ui':
         specifier: ^1.0.1
         version: 1.0.1(@base-org/account@1.1.1(@types/react@18.3.11)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.76))(clsx@2.1.1)(preact@10.26.5)(react@18.3.1)
+      '@campnetwork/origin':
+        specifier: ^0.0.17
+        version: 0.0.17(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.1(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       '@coinbase/onchainkit':
         specifier: ^0.38.17
         version: 0.38.17(@tanstack/query-core@5.83.1)(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -199,6 +202,13 @@ packages:
 
   '@base-org/account@1.1.1':
     resolution: {integrity: sha512-IfVJPrDPhHfqXRDb89472hXkpvJuQQR7FDI9isLPHEqSYt/45whIoBxSPgZ0ssTt379VhQo4+87PWI1DoLSfAQ==}
+
+  '@campnetwork/origin@0.0.17':
+    resolution: {integrity: sha512-QroN2/4OLXBS7yHJltIZpqyYUivpclhGhyk4D++S96u1K3IGSHTLa7aWQWDARvzrST7x+oFlLpVY0jzgViMK9g==}
+    peerDependencies:
+      '@tanstack/react-query': ^5
+      react: '>=18 <20'
+      react-dom: '>=18 <20'
 
   '@coinbase/onchainkit@0.38.17':
     resolution: {integrity: sha512-TMZwdsSzzOcswIKnPolCMJJlmTYrSV+cx/T2UV3LTRWPvvACvCV5TTKQx7ELs34Fqtp7QA7Kcn4unio4En2PaQ==}
@@ -3746,6 +3756,40 @@ snapshots:
       - react
       - typescript
       - use-sync-external-store
+      - utf-8-validate
+      - zod
+
+  '@campnetwork/origin@0.0.17(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.1(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
+    dependencies:
+      '@tanstack/react-query': 5.84.1(react@18.3.1)
+      '@walletconnect/ethereum-provider': 2.21.1(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      axios: 1.8.4
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      viem: 2.33.2(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)
+      wagmi: 2.16.1(@tanstack/query-core@5.83.1)(@tanstack/react-query@5.84.1(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.33.2(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76))(zod@3.25.76)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@tanstack/query-core'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - bufferutil
+      - debug
+      - encoding
+      - immer
+      - ioredis
+      - supports-color
+      - typescript
       - utf-8-validate
       - zod
 
