@@ -8,21 +8,19 @@ import {
   useConnect,
 } from "@campnetwork/origin/react";
 
-export async function assignImage(imageId: string, jwt: string) {
-  await fetch(`https://api.origin.campnetwork.xyz/auth/merv/assign-image`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${jwt}`,
-      "Content-Type": "application/json",
+export default function Mint() {
+  const { jwt, origin, viem } = useAuth();
+
+  async function assignImage(imageId: string, jwt: string) {
+    await fetch(`https://api.origin.campnetwork.xyz/auth/merv/assign-image`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        "Content-Type": "application/json",
     },
     body: JSON.stringify({ image_id: imageId }),
   });
 }
-
-export default function Mint() {
-  const { jwt, origin, viem } = useAuth();
-
-  console.log(jwt, origin, viem);
 
   const handleMint = async () => {
     if (!origin || !jwt) throw new Error("User not authenticated");
