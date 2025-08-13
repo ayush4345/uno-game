@@ -4,6 +4,7 @@ import ProfilePage from '@/components/profile/ProfilePage';
 import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { userAccountState } from '@/userstate/userState';
+import BottomNavigation from '@/components/BottomNavigation';
 
 export default function Profile() {
   const [userAccount, setUserAccount] = useRecoilState(userAccountState);
@@ -34,10 +35,11 @@ export default function Profile() {
   }, [userAccount, setUserAccount]);
 
   return (
-    <main className="bg-cover bg-[url('/bg-2.jpg')] min-h-screen">
-      <div className="container mx-auto py-6 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+      <div className="container mx-auto py-6 px-4 pb-24">
         <ProfilePage userAccount={userAccount} connectWallet={connectWallet} isLoading={isLoading} />
       </div>
+      <BottomNavigation />
     </main>
   );
 }

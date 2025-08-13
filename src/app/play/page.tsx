@@ -21,6 +21,7 @@ import {
   useWalletClient,
 } from "wagmi";
 import Link from "next/link";
+import BottomNavigation from "@/components/BottomNavigation";
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
@@ -223,105 +224,197 @@ export default function PlayGame() {
   }, [address]);
 
   return (
-    <div className="relative p-3 h-screen flex flex-col justify-between">
-      <div>
-        <div className="bg-white relative rounded-2xl flex gap-5 p-3 items-center justify-between">
-          <div className="flex gap-4 items-center">
-            <Link href="/profile" className="cursor-pointer">
-              <Avatar>
-                <AvatarImage
-                  src={`https://api.dicebear.com/8.x/notionists/svg`}
-                  alt="@user"
-                />
-                <AvatarFallback>MD</AvatarFallback>
-              </Avatar>
-            </Link>
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-12">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+            <span className="text-2xl font-bold text-blue-600">Z</span>
           </div>
-          {/* <span className='flex items-center'>
-                        <div className='font-bold'>{"Hey"}</div>
-                        <div className='font-light text-gray-500 text-sm'>Go to profile</div>
-                    </span> */}
-          <WalletConnection />
+          <span className="text-xl font-bold">Zunno</span>
         </div>
-        {!address ? (
-          <div className="relative text-center flex justify-center">
-            <img src="/login-button-bg.png" />
-            <div className="left-1/2 -translate-x-1/2 absolute bottom-4">
-              <WalletConnection />
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div>
-              <h2 className="mt-3 text-white font-bold text-3xl">Games list</h2>
-              <ScrollArea className="h-[calc(100vh-320px)] mt-3 rounded-2xl border-[1px] shadow-md border-[#000022] bg-[#b49fc9] p-4">
-                {games.toReversed().map((gameId, index) => (
-                  <div
-                    key={index}
-                    className="bg-[#000022]/10 rounded-2xl p-3 mt-3 flex gap-3 items-center justify-around hover:bg-[#000022]/20"
-                  >
-                    <div>
-                      <span className="font-bold">Game </span>
-                      <span className="font-bold">{gameId.toString()}</span>
-                    </div>
-                    <StyledButton
-                      onClick={() => joinGame(gameId)}
-                      className="bg-[#FF7033] max-w-24"
-                    >
-                      Join
-                    </StyledButton>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
-            <div className="flex mt-3">
-              <StyledButton
-                onClick={() => createGame()}
-                className="bg-[#FF7033] w-full"
-              >
-                {createLoading ? "Creating..." : "Create game"}
-              </StyledButton>
-            </div>
+        
+        {isConnected && (
+          <div className="flex items-center space-x-2">
+            <WalletConnection />
           </div>
         )}
       </div>
-      {/* <div className='w-full'>
-                <FooterNavigation />
+
+      {!isConnected ? (
+        <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
+            <p className="text-gray-300 text-lg">Ready to challenge the blockchain?</p>
+          </div>
+          <WalletConnection />
+        </div>
+      ) : (
+        <div className="px-4 pb-8">
+          {/* Welcome Section */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2">Welcome Back!</h1>
+            <p className="text-gray-300">Ready to challenge the blockchain?</p>
+          </div>
+
+          {/* Game Modes Section */}
+          <div className="mb-8">
+            {/* <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Game Modes</h2>
+              <button className="text-cyan-400 text-sm font-medium">View All</button>
             </div> */}
 
-      {/*<TokenInfoBar />
-            <div className='bg-white w-full max-w-[1280px] h-[720px] overflow-hidden mx-auto my-8 px-4 py-2 rounded-lg bg-cover bg-[url("/bg-2.jpg")] relative shadow-[0_0_20px_rgba(0,0,0,0.8)]'>
-                <div className='absolute inset-0 bg-no-repeat bg-[url("/table-1.png")]'></div>
-                <div className='absolute left-8 -right-8 top-14 -bottom-14 bg-no-repeat bg-[url("/dealer.png")] transform-gpu'>
-                    <div className='absolute -left-8 right-8 -top-14 bottom-14 bg-no-repeat bg-[url("/card-0.png")] animate-pulse'></div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Quick Match Card */}
+              <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
+                <div className="absolute top-4 left-4">
+                  <div className="w-12 h-12 bg-blue-400/30 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">⚡</span>
+                  </div>
                 </div>
-                <div className='absolute top-0 md:left-1/2 md:right-0 bottom-0 w-[calc(100%-2rem)] md:w-auto md:pr-20 py-12'>
-                    {!address ?
-                        <div className='relative text-center flex flex-col items-center'>
-                            <img src='/login-button-bg.png' />
-                            <div className='absolute bottom-4 w-full'>
-                                <WalletConnection />
+                <div className="mt-16">
+                  <h3 className="font-bold text-lg mb-2">Quick Match</h3>
+                  <p className="text-blue-100 text-sm mb-3">Instant play with auto-matching</p>
+                  {/* <div className="flex items-center text-blue-100 text-sm">
+                    <span className="mr-2">👥</span>
+                    <span>{games.length} online</span>
+                  </div> */}
+                    <div className="flex items-center text-blue-100 text-sm">
+                    <span>Coming soon...</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Create Room Card */}
+              <div 
+                className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 relative overflow-hidden min-h-[160px] cursor-pointer transform transition-transform hover:scale-105 active:scale-95" 
+                onClick={createGame}
+              >
+                <div className="absolute top-4 left-4">
+                  <div className="w-12 h-12 bg-orange-400/30 rounded-full flex items-center justify-center">
+                    <span className="text-2xl font-bold">+</span>
+                  </div>
+                </div>
+                <div className="mt-16">
+                  <h3 className="font-bold text-lg mb-2">Create Room</h3>
+                  <p className="text-orange-100 text-sm mb-3">Custom settings & invite friends</p>
+                  {/* <div className="flex items-center text-orange-100 text-sm">
+                    <span className="mr-2">⚙️</span>
+                    <span>Full customization</span>
+                  </div> */}
+                </div>
+                {createLoading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
+                    <div className="text-white font-medium">Creating...</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Tournament Card */}
+              {/* <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
+                <div className="absolute top-4 left-4">
+                  <div className="w-12 h-12 bg-purple-400/30 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🏆</span>
+                  </div>
+                </div>
+                <div className="mt-16">
+                  <h3 className="font-bold text-lg mb-2">Tournament</h3>
+                  <p className="text-purple-100 text-sm mb-3">Compete for big prizes</p>
+                  <div className="flex items-center text-yellow-300 text-sm font-medium">
+                    <span className="mr-2">💰</span>
+                    <span>10,000 ZUNNO</span>
+                  </div>
+                  <div className="text-yellow-300 text-xs">Prize Pool</div>
+                </div>
+              </div> */}
+
+              {/* Practice Card */}
+              {/* <div className="bg-gradient-to-br from-green-500 to-green-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
+                <div className="absolute top-4 left-4">
+                  <div className="w-12 h-12 bg-green-400/30 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🎯</span>
+                  </div>
+                </div>
+                <div className="mt-16">
+                  <h3 className="font-bold text-lg mb-2">Practice</h3>
+                  <p className="text-green-100 text-sm mb-3">Play against AI opponents</p>
+                  <div className="flex items-center text-green-100 text-sm">
+                    <span className="mr-2">🤖</span>
+                    <span>No gas fees</span>
+                  </div>
+                </div>
+              </div> */}
+            </div>
+          </div>
+
+          {/* Available Rooms Section */}
+          <div className="mb-24">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Available Rooms</h2>
+              <button
+                onClick={createGame}
+                disabled={createLoading}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
+              >
+                {createLoading ? "Creating..." : "+ Create"}
+              </button>
+            </div>
+            
+            {games.length > 0 ? (
+              <div className="bg-gray-800/30 rounded-3xl p-4">
+                <ScrollArea className="max-h-80">
+                  <div className="space-y-3">
+                    {games.toReversed().map((gameId, index) => (
+                      <div
+                        key={index}
+                        className="bg-gray-700/40 rounded-2xl p-4 flex items-center justify-between hover:bg-gray-700/60 transition-all"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold">#{gameId.toString().slice(-2)}</span>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">Room {gameId.toString()}</h3>
+                            <div className="flex items-center text-gray-400 text-sm">
+                              <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                              <span>Waiting for players</span>
                             </div>
+                          </div>
                         </div>
-                        : <>
-                            <StyledButton onClick={() => createGame()} className='w-fit bg-[#00b69a] bottom-4 text-2xl my-3 mx-auto'>{createLoading == true ? 'Creating...' : 'Create Game Room'}</StyledButton>
-                            <p className='text-white text-sm font-mono'>Note: Don't join the room where game is already started</p>
-                            {joinLoading == true && <div className='text-white mt-2 text-2xl shadow-lg'>Wait, while we are joining your game room...</div>}
-                            <h2 className="text-2xl font-bold mb-4 text-white">Active Game Rooms:</h2>
-                            <ScrollArea className="h-[620px] rounded-md border border-gray-200 bg-white p-4">
-                                <ul className="space-y-2">
-                                    {games.toReversed().map(gameId => (
-                                        <li key={gameId.toString()} className="mb-2 bg-gray-100 p-4 rounded-lg shadow flex flex-row justify-between items-center">
-                                            <h2 className="text-xl font-semibold text-gray-800">Game {gameId.toString()}</h2>
-                                            <StyledButton onClick={() => joinGame(gameId)} className='w-fit bg-[#00b69a] bottom-4 text-2xl'>Join Game </StyledButton>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </ScrollArea>
-                        </>
-                    }
+                        <button
+                          onClick={() => joinGame(gameId)}
+                          disabled={joinLoading}
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-6 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
+                        >
+                          {joinLoading ? "Joining..." : "Join"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            ) : (
+              <div className="bg-gray-800/30 rounded-3xl p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <span className="text-4xl">🎮</span>
                 </div>
-            </div>*/}
+                <h3 className="text-lg font-semibold mb-2">No Active Rooms</h3>
+                <p className="text-gray-400 text-sm mb-4">Be the first to create a room and start playing!</p>
+                <button
+                  onClick={createGame}
+                  disabled={createLoading}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 active:scale-95"
+                >
+                  {createLoading ? "Creating Room..." : "Create First Room"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )} 
+      
+      <BottomNavigation />
+      
       <Toaster />
     </div>
   );

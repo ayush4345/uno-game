@@ -9,6 +9,7 @@ import Feature from "@/components/homepage/Feature"
 import Partner from "@/components/homepage/Partner"
 import Procedure from "@/components/homepage/Procedure"
 import { useMiniKit } from "@/hooks/useMiniKit";
+import BottomNavigation from "@/components/BottomNavigation";
 
 
 export default function Home() {
@@ -36,6 +37,7 @@ export default function Home() {
           <Footer />
         </div>
       </div>
+      <BottomNavigation />
     </main>
   )
 }
