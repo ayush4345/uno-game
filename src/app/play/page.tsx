@@ -25,7 +25,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
-  "https://unosocket-6k6gsdlfoa-el.a.run.app/";
+  "https://zkuno-669372856670.us-central1.run.app";
 
 // DIAM wallet integration removed
 
