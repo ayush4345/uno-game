@@ -1,1 +1,2 @@
-Uno with a twist of 5 cards.
+
+Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game, now enhanced with bloackchain technology to ensure privacy, fairness, and security in every game.
