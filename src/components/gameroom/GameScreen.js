@@ -185,7 +185,7 @@ const GameScreen = ({
             </div>
             <div>
               <div style={{ color: "white", fontWeight: "bold" }}>You</div>
-              <div style={{ color: "#10b981", fontSize: "0.875rem" }}>Your Turn</div>
+              <div style={{ color: "#10b981", fontSize: "0.875rem", display: turn === currentUser ? "block" : "none" }}>Your Turn</div>
             </div>
           </div>
         </div>

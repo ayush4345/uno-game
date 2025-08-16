@@ -1,8 +1,4 @@
-import { useState } from "react";
-
-export default function GameCard({index, gameId, joinGame}: {index: number, gameId: BigInt, joinGame: (gameId: BigInt) => void}) {
-
-    const [joinLoading, setJoinLoading] = useState(false);
+export default function GameCard({index, gameId, joinGame, joinLoading}: {index: number, gameId: BigInt, joinGame: (gameId: BigInt) => void, joinLoading: boolean}) {
 
   return (
     <div

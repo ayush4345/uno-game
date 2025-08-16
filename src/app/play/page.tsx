@@ -1,27 +1,23 @@
 "use client";
 
-import StyledButton from "@/components/styled-button";
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import TokenInfoBar from "@/components/TokenBar";
 import { UnoGameContract } from "@/lib/types";
 import { getContractNew } from "@/lib/web3";
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUserAccount } from "@/userstate/useUserAccount";
 import { WalletConnection } from "@/components/WalletConnection";
 import {
   useAccount,
   useConnect,
-  useDisconnect,
-  useContractWrite,
   useWalletClient,
 } from "wagmi";
-import Link from "next/link";
 import BottomNavigation from "@/components/BottomNavigation";
+import GameCard from "./gameCard";
+import Link from "next/link";
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
@@ -33,14 +29,13 @@ export default function PlayGame() {
   const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [open, setOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
-  const [joinLoading, setJoinLoading] = useState(false);
+  const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
   const [games, setGames] = useState<BigInt[]>([]);
   const router = useRouter();
 
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useAccount();
-  console.log(address);
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
 
@@ -172,7 +167,7 @@ export default function PlayGame() {
   const joinGame = async (gameId: BigInt) => {
     if (contract && address) {
       try {
-        setJoinLoading(true);
+        setJoiningGameId(gameId);
 
         console.log(`Joining game ${gameId.toString()}...`);
 
@@ -182,13 +177,11 @@ export default function PlayGame() {
         console.log("Transaction hash:", tx.hash);
         await tx.wait();
 
-        setJoinLoading(false);
-
         console.log("Joined game successfully");
         router.push(`/game/${gameId.toString()}`);
       } catch (error) {
         console.error("Failed to join game:", error);
-        setJoinLoading(false);
+        setJoiningGameId(null);
         toast({
           title: "Transaction Failed",
           description: "Failed to join game.",
@@ -196,6 +189,7 @@ export default function PlayGame() {
         });
       }
     } else {
+      setJoiningGameId(null);
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to join a game.",
@@ -228,10 +222,11 @@ export default function PlayGame() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-12">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-blue-600">Z</span>
+          <div className="w-16 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+            <Link href="/">
+              <img src="/logo.jpg" alt="" />
+            </Link>
           </div>
-          <span className="text-xl font-bold">Zunno</span>
         </div>
         
         {isConnected && (
@@ -245,16 +240,16 @@ export default function PlayGame() {
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
-            <p className="text-gray-300 text-lg">Ready to challenge the blockchain?</p>
+            <p className="text-gray-300 text-lg">Ready to challenge?</p>
           </div>
           <WalletConnection />
         </div>
       ) : (
-        <div className="px-4 pb-8">
+        <div className="px-4">
           {/* Welcome Section */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Welcome Back!</h1>
-            <p className="text-gray-300">Ready to challenge the blockchain?</p>
+            <p className="text-gray-300">Ready to challenge?</p>
           </div>
 
           {/* Game Modes Section */}
@@ -365,30 +360,13 @@ export default function PlayGame() {
                 <ScrollArea className="max-h-80">
                   <div className="space-y-3">
                     {games.toReversed().map((gameId, index) => (
-                      <div
+                      <GameCard
                         key={index}
-                        className="bg-gray-700/40 rounded-2xl p-4 flex items-center justify-between hover:bg-gray-700/60 transition-all"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                            <span className="text-sm font-bold">#{gameId.toString().slice(-2)}</span>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-lg">Room {gameId.toString()}</h3>
-                            <div className="flex items-center text-gray-400 text-sm">
-                              <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                              <span>Waiting for players</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => joinGame(gameId)}
-                          disabled={joinLoading}
-                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-6 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
-                        >
-                          {joinLoading ? "Joining..." : "Join"}
-                        </button>
-                      </div>
+                        index={index}
+                        gameId={gameId}
+                        joinGame={joinGame}
+                        joinLoading={joiningGameId !== null && joiningGameId.toString() === gameId.toString()}
+                      />
                     ))}
                   </div>
                 </ScrollArea>
