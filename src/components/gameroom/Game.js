@@ -573,7 +573,7 @@ const Game = ({ room, currentUser }) => {
 
   return (
     <div className={`backgroundColor${currentColor}`}>
-      <MemoizedHeader roomCode={room} />
+      {/* <MemoizedHeader roomCode={room} /> */}
       {!gameOver ? (
         <>
           <GameScreen

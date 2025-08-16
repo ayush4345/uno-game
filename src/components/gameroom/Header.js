@@ -17,21 +17,7 @@ function Header({ roomCode }) {
         <Link href="/profile" className='material-icons text-white text-2xl'>{"account_circle"}</Link>
         <h1 className="text-lg font-bold text-white mt-0">Room Code: {roomCode}</h1>
       </div>
-      <span>
-        <StyledButton className='bg-green-500' onClick={toggleMute}>
-          <span className='material-icons'>{isSoundMuted ? "volume_off" : "volume_up"}</span>
-        </StyledButton>
-        <StyledButton
-          className='bg-green-500'
-          onClick={() => {
-            if (isMusicMuted) playBBgMusic();
-            else pause();
-            setMusicMuted(!isMusicMuted);
-          }}
-        >
-          <span className='material-icons'>{isMusicMuted ? "music_off" : "music_note"}</span>
-        </StyledButton>
-      </span>
+      
     </div>
   );
 }

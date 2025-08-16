@@ -1,7 +1,7 @@
 import React from "react";
 
 function Spinner() {
-  return <div className='loader'></div>;
+  return <div className=''></div>;
 }
 
 const MemoizedSpinner = React.memo(Spinner);

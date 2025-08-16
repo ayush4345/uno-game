@@ -60,7 +60,7 @@ export default function RootLayout({
         <Analytics />
         <Providers>
           {children}
-          <CampModal />
+          {/* <CampModal /> */}
         </Providers>
       </body>
     </html>
