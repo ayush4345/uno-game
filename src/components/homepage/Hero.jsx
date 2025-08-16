@@ -51,14 +51,14 @@ const Hero = () => {
             <p className="text-white/80 text-lg">A UNO Game on Blockchain</p>
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <h1 className="text-6xl md:text-7xl text-white font-bold tracking-wider">
               {slides["title"]}
             </h1>
             <h1 className="text-6xl md:text-7xl text-white font-bold tracking-wider">
               {slides["subtitle"]}
             </h1>
-          </div>
+          </div> */}
 
           {/* <div className="flex gap-4 mt-12">
             {slides.map((_, index) => (

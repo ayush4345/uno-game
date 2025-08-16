@@ -24,7 +24,7 @@ const ColourDialog: React.FC<ColourDialogProps> = ({ onSubmit, onClose, isDialog
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (open == false) { onClose() } }}>
-            <DialogContent>
+            <DialogContent className='top-[10%]'>
                 <DialogHeader>
                     <DialogTitle>Card colour</DialogTitle>
                     <DialogDescription>Choose a colour for the card</DialogDescription>
