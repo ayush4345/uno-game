@@ -18,27 +18,19 @@ const Hero = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, []);
 
-  const slides = [
-    {
-      title: "LEVEL UP NEW",
-      subtitle: "EXPERIENCE",
-      image: "/images/hero-1.png",
-      logo: "/logo.jpg"
-    },
-    {
-      title: "PLAY TO",
-      subtitle: "EARN",
-      image: "/images/hero-2.png",
-      logo: "/logo.jpg"
-    },
-  ];
+  const slides =  {
+      "title": "LEVEL UP NEW",
+      "subtitle": "EXPERIENCE",
+      "image": "/images/hero-1.png",
+      "logo": "/logo.jpg"
+    }
 
   return (
     <section className="relative min-h-screen bg-[#0A0A0A]">
       <div className="relative w-full h-screen">
         <div className="absolute inset-0">
           <Image
-            src={slides[currentSlide].image}
+            src={slides["image"]}
             alt="Hero background"
             fill
             className="object-cover transition-opacity duration-500"
@@ -50,7 +42,7 @@ const Hero = () => {
         <div className="absolute inset-0 flex flex-col items-start justify-center z-10 px-8 md:px-16 lg:px-24">
           <div className="mb-8">
             <Image
-              src={slides[currentSlide].logo}
+              src={slides["logo"]}
               alt="Zunno Logo"
               width={200}
               height={60}
@@ -61,14 +53,14 @@ const Hero = () => {
 
           <div className="space-y-2">
             <h1 className="text-6xl md:text-7xl text-white font-bold tracking-wider">
-              {slides[currentSlide].title}
+              {slides["title"]}
             </h1>
             <h1 className="text-6xl md:text-7xl text-white font-bold tracking-wider">
-              {slides[currentSlide].subtitle}
+              {slides["subtitle"]}
             </h1>
           </div>
 
-          <div className="flex gap-4 mt-12">
+          {/* <div className="flex gap-4 mt-12">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -81,15 +73,15 @@ const Hero = () => {
                 {index + 1}
               </button>
             ))}
-          </div>
+          </div> */}
 
           <StyledButton onClick={() => router.push("/play")} roundedStyle='rounded-full' className='bg-[#ff9000] text-2xl mt-6'>Start Game</StyledButton>
         </div>
 
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-8 text-2xl text-white/50">
+        {/* <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-8 text-2xl text-white/50">
           <span className={currentSlide === 0 ? 'text-white' : ''}>01</span>
           <span className={currentSlide === 1 ? 'text-white' : ''}>02</span>
-        </div>
+        </div> */}
       </div>
     </section>
   );

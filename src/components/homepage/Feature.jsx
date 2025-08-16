@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 
 const Feature = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   const features = [
     {
@@ -24,13 +25,31 @@ const Feature = () => {
     }
   ];
 
-  const nextFeature = () => {
+  const nextFeature = useCallback(() => {
     setCurrentFeature((prev) => (prev === features.length - 1 ? 0 : prev + 1));
+  }, [features.length]);
+
+  const prevFeature = useCallback(() => {
+    setCurrentFeature((prev) => (prev === 0 ? features.length - 1 : prev - 1));
+  }, [features.length]);
+
+  const goToFeature = (index) => {
+    setCurrentFeature(index);
+    // Pause autoplay temporarily when manually navigating
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
-  const prevFeature = () => {
-    setCurrentFeature((prev) => (prev === 0 ? features.length - 1 : prev - 1));
-  };
+  // Auto-advance carousel
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    
+    const interval = setInterval(() => {
+      nextFeature();
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, nextFeature]);
 
   return (
     <section className="py-20 bg-[#0A0A0A]">
@@ -40,65 +59,41 @@ const Feature = () => {
           <h2 className="text-white text-4xl font-bold">What we bring to the table</h2>
         </div>
 
-        <div className="relative">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-            <div className="relative w-64 h-64 opacity-50 transition-all duration-500 mb-4 md:mb-0">
-              <Image
-                src={features[(currentFeature - 1 + features.length) % features.length].image}
-                alt="Previous feature"
-                fill
-                className="object-cover rounded-lg"
-              />
-              <div className="absolute inset-0 bg-black/50 rounded-lg">
-                <div className="p-6 text-white">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {features[(currentFeature - 1 + features.length) % features.length].title}
-                  </h3>
-                  <p className="text-sm opacity-80">
-                    {features[(currentFeature - 1 + features.length) % features.length].description}
-                  </p>
+        <div className="relative overflow-hidden">
+          {/* Main carousel */}
+          <div className="relative h-[500px] md:h-[400px] w-full">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className={`absolute inset-0 transition-all duration-700 ease-in-out ${getSlidePosition(index, currentFeature, features.length)}`}
+              >
+                <div className="relative h-full w-full rounded-2xl overflow-hidden">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-cover"
+                    priority={index === currentFeature}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                      <h3 className="text-2xl md:text-3xl font-semibold mb-3">{feature.title}</h3>
+                      <p className="text-base md:text-lg opacity-90">{feature.description}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="relative w-96 h-96 z-10 transition-all duration-500 mb-4 md:mb-0">
-              <Image
-                src={features[currentFeature].image}
-                alt="Current feature"
-                fill
-                className="object-cover rounded-lg"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent rounded-lg">
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <h3 className="text-2xl font-semibold mb-3">{features[currentFeature].title}</h3>
-                  <p className="text-lg opacity-90">{features[currentFeature].description}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative w-64 h-64 opacity-50 transition-all duration-500">
-              <Image
-                src={features[(currentFeature + 1) % features.length].image}
-                alt="Next feature"
-                fill
-                className="object-cover rounded-lg"
-              />
-              <div className="absolute inset-0 bg-black/50 rounded-lg">
-                <div className="p-6 text-white">
-                  <h3 className="text-xl font-semibold mb-2">
-                    {features[(currentFeature + 1) % features.length].title}
-                  </h3>
-                  <p className="text-sm opacity-80">
-                    {features[(currentFeature + 1) % features.length].description}
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
+          {/* Navigation buttons */}
           <button
-            onClick={prevFeature}
-            className="md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2 md:-translate-x-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all mt-6 md:mt-0 mx-auto md:mx-0"
+            onClick={() => {
+              prevFeature();
+              setIsAutoPlaying(false);
+              setTimeout(() => setIsAutoPlaying(true), 5000);
+            }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all z-20"
             aria-label="Previous feature"
           >
             <svg
@@ -107,14 +102,18 @@ const Feature = () => {
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="white"
-              className="w-6 h-6"
+              className="w-5 h-5 md:w-6 md:h-6"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
           <button
-            onClick={nextFeature}
-            className="md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 md:translate-x-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all mt-4 md:mt-0 mx-auto md:mx-0"
+            onClick={() => {
+              nextFeature();
+              setIsAutoPlaying(false);
+              setTimeout(() => setIsAutoPlaying(true), 5000);
+            }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-all z-20"
             aria-label="Next feature"
           >
             <svg
@@ -123,15 +122,48 @@ const Feature = () => {
               viewBox="0 0 24 24"
               strokeWidth={2}
               stroke="white"
-              className="w-6 h-6"
+              className="w-5 h-5 md:w-6 md:h-6"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </button>
+
+          {/* Indicators */}
+          <div className="flex justify-center mt-6 gap-3">
+            {features.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToFeature(index)}
+                className={`w-3 h-3 rounded-full transition-all ${index === currentFeature ? 'bg-[#FDB813] w-8' : 'bg-white/30 hover:bg-white/50'}`}
+                aria-label={`Go to feature ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 };
+
+// Helper function to determine slide position
+function getSlidePosition(index, currentIndex, totalSlides) {
+  // Current slide is visible
+  if (index === currentIndex) {
+    return 'translate-x-0 opacity-100 z-10';
+  }
+  
+  // Next slide (to the right)
+  if (index === (currentIndex + 1) % totalSlides) {
+    return 'translate-x-full opacity-0';
+  }
+  
+  // Previous slide (to the left)
+  if (index === (currentIndex - 1 + totalSlides) % totalSlides) {
+    return '-translate-x-full opacity-0';
+  }
+  
+  // All other slides (hidden)
+  return 'translate-x-full opacity-0';
+}
 
 export default Feature;
