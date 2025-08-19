@@ -22,7 +22,7 @@ export default function GameCard({index, gameId, joinGame, joinLoading}: {index:
       <button
         onClick={() => joinGame(gameId)}
         disabled={joinLoading}
-        className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-6 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
+        className={`glossy-button glossy-button-blue transition-all duration-300 ${joinLoading ? 'opacity-70' : ''}`}
       >
         {joinLoading ? "Joining..." : "Join"}
       </button>

@@ -33,11 +33,10 @@ const GameScreen = ({
   
   return (
     <div className="game-container" style={{
-      background: "#0f172a", 
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      padding: "1rem"
+      padding: "1rem",
     }}>
       {/* Game Header */}
       <div className="game-header" style={{
@@ -82,13 +81,11 @@ const GameScreen = ({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        marginBottom: "2rem"
       }}>
         <div className="opponent-info" style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          marginBottom: "1rem",
           position: "relative"
         }}>
           <div className="avatar" style={{
@@ -105,8 +102,8 @@ const GameScreen = ({
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
-          <div style={{ color: "white", fontWeight: "bold" }}>Opponent</div>
-          <div style={{ color: "#94a3b8", fontSize: "0.875rem" }}>Thinking...</div>
+          {/* <div style={{ color: "white", fontWeight: "bold" }}>Opponent</div> */}
+          <div style={{ color: "#94a3b8", fontSize: "0.875rem", visibility: turn === opponentName ? "visible" : "hidden" }}>Thinking...</div>
         </div>
         
         <PlayerViewofOpponent
@@ -159,6 +156,38 @@ const GameScreen = ({
       </div>
 
       {/* Player View */}
+      <div style={{ display: "flex" }}>
+          <button
+            className="skip-button"
+            disabled={turn !== currentUser || !drawButtonPressed}
+            onClick={onSkipButtonHandler}
+            style={{
+              margin: "auto",
+              background: "linear-gradient(to bottom, #f43f5e, #e11d48)",
+              color: "white",
+              fontWeight: "bold",
+              fontSize: "1.25rem",
+              padding: "0.5rem 2rem",
+              borderRadius: "0.5rem",
+              border: "none",
+              boxShadow: "0 0 15px rgba(225, 29, 72, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3)",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              opacity: turn !== currentUser || !drawButtonPressed ? "0.6" : "1",
+              pointerEvents: turn !== currentUser || !drawButtonPressed ? "none" : "auto",
+              position: "relative",
+              overflow: "hidden"
+            }}
+          >
+            <span style={{
+              position: "absolute",
+              inset: 0,
+              background: "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
+              opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1"
+            }}></span>
+            SKIP
+          </button>
+        </div>
       <div className="player-section" style={{
         marginTop: "2rem"
       }}>
@@ -189,7 +218,6 @@ const GameScreen = ({
             </div>
           </div>
         </div>
-        
         <MainPlayerView
           turn={turn}
           mainPlayer={currentUser}

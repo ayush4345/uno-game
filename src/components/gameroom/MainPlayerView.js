@@ -63,16 +63,6 @@ const MainPlayerView = ({
       </div>
       
       {/* Hide the skip button as it's now handled in the parent */}
-      <div style={{ display: "flex" }}>
-        <StyledButton
-          className='bg-red-500 m-auto'
-          disabled={isSkipButtonDisabled}
-          onClick={onSkipButtonHandler}
-          style={isSkipButtonDisabled ? { pointerEvents: "none" } : null}
-        >
-          SKIP
-        </StyledButton>
-      </div>
     </>
   );
 };

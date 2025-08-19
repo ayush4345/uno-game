@@ -380,6 +380,7 @@ const Game = ({ room, currentUser }) => {
   };
 
   const onCardDrawnHandler = () => {
+    console.log("hii")
     //extract player who drew the card
     let drawButtonPressed = true;
     let turnCopy = turn;
