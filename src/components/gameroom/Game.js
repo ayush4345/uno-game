@@ -45,7 +45,7 @@ const initialGameState = {
 
 const gameReducer = (state, action) => ({ ...state, ...action });
 
-const Game = ({ room, currentUser }) => {
+const Game = ({ room, currentUser, isComputerMode = false }) => {
   const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,10 +55,6 @@ const Game = ({ room, currentUser }) => {
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
-
-  const { toast } = useToast();
-
-  console.log(isDialogOpen)
 
   const {
     gameOver,
@@ -74,6 +70,68 @@ const Game = ({ room, currentUser }) => {
     drawButtonPressed,
     lastCardPlayedBy,
   } = gameState;
+
+  const { toast } = useToast();
+
+  // Computer AI logic
+  const getValidMoves = (computerDeck, currentColor, currentNumber) => {
+    return computerDeck.filter(card => {
+      // Wild cards can always be played
+      if (card.includes("W") || card.includes("D4W")) return true;
+      
+      // Match color or number
+      const cardColor = card.charAt(1);
+      const cardNumber = card.charAt(0);
+      
+      return cardColor === currentColor || cardNumber === currentNumber;
+    });
+  };
+
+  const computerMakeMove = () => {
+    const validMoves = getValidMoves(player2Deck, currentColor, currentNumber);
+    
+    if (validMoves.length > 0) {
+      // Prioritize special cards if available
+      const specialCards = validMoves.filter(card => 
+        card.includes("skip") || card.includes("D2") || card === "W" || card === "D4W"
+      );
+      
+      if (specialCards.length > 0) {
+        return specialCards[0]; // Play the first special card found
+      }
+      
+      // Otherwise play a regular card
+      return validMoves[0];
+    } else {
+      // Draw a card if no valid moves
+      return "draw";
+    }
+  };
+
+  // Handle computer turn with delay for better UX
+  useEffect(() => {
+    if (isComputerMode && turn === "Player 2" && !gameOver) {
+      const computerTurnDelay = setTimeout(() => {
+        // Check if computer should declare UNO (when it has 2 cards and will play one)
+        if (player2Deck.length === 2) {
+          dispatch({ isUnoButtonPressed: true });
+          playUnoSound();
+        }
+        
+        const computerMove = computerMakeMove();
+        
+        if (computerMove === "draw") {
+          // Computer draws a card
+          onCardDrawnHandler();
+        } else {
+          // Computer plays a card
+          onCardPlayedHandler(computerMove);
+        }
+      }, 1500); // 1.5 second delay for better UX
+
+      return () => clearTimeout(computerTurnDelay);
+    }
+  }, [turn, isComputerMode, gameOver, player2Deck, currentColor, currentNumber]);
 
   //handles the sounds with our custom sound provider
   const {
@@ -96,41 +154,88 @@ const Game = ({ room, currentUser }) => {
 
   //runs once on component mount
   useEffect(() => {
-    //shuffle PACK_OF_CARDS array
-    const shuffledCards = shuffleArray(PACK_OF_CARDS);
+    console.log('Game component mounted, isComputerMode:', isComputerMode);
+    
+    if (isComputerMode) {
+      console.log('Initializing computer mode game...');
+      // For computer mode, initialize game state directly
+      const shuffledCards = shuffleArray(PACK_OF_CARDS);
+      console.log('Shuffled cards:', shuffledCards.length);
 
-    //extract first 5 elements to player1Deck
-    const player1Deck = shuffledCards.splice(0, 5);
+      //extract first 7 elements to player1Deck (standard Uno starting hand)
+      const player1Deck = shuffledCards.splice(0, 5);
 
-    //extract first 5 elements to player2Deck
-    const player2Deck = shuffledCards.splice(0, 5);
+      //extract first 7 elements to player2Deck (computer)
+      const player2Deck = shuffledCards.splice(0, 5);
 
-    //extract random card from shuffledCards and check if its not an action card
-    //108-14=94
-    let startingCardIndex = Math.floor(Math.random() * 94);
+      //extract random card from shuffledCards and check if its not an action card
+      let startingCardIndex = Math.floor(Math.random() * (shuffledCards.length - ACTION_CARDS.length));
 
-    while (ACTION_CARDS.includes(shuffledCards[startingCardIndex])) {
-      startingCardIndex = Math.floor(Math.random() * 94);
+      while (ACTION_CARDS.includes(shuffledCards[startingCardIndex])) {
+        startingCardIndex = Math.floor(Math.random() * (shuffledCards.length - ACTION_CARDS.length));
+      }
+
+      //extract the card from that startingCardIndex into the playedCardsPile
+      const playedCardsPile = shuffledCards.splice(startingCardIndex, 1);
+
+      //store all remaining cards into drawCardPile
+      const drawCardPile = [...shuffledCards];
+
+      console.log('Computer mode game state initialized:', {
+        player1Deck: player1Deck.length,
+        player2Deck: player2Deck.length,
+        playedCard: playedCardsPile[0],
+        drawPile: drawCardPile.length
+      });
+
+      // Initialize game state directly for computer mode
+      dispatch({
+        gameOver: false,
+        turn: "Player 1",
+        player1Deck: player1Deck,
+        player2Deck: player2Deck,
+        currentColor: playedCardsPile[0].charAt(1),
+        currentNumber: playedCardsPile[0].charAt(0),
+        playedCardsPile: playedCardsPile,
+        drawCardPile: drawCardPile,
+      });
+    } else {
+      //shuffle PACK_OF_CARDS array
+      const shuffledCards = shuffleArray(PACK_OF_CARDS);
+
+      //extract first 5 elements to player1Deck
+      const player1Deck = shuffledCards.splice(0, 5);
+
+      //extract first 5 elements to player2Deck
+      const player2Deck = shuffledCards.splice(0, 5);
+
+      //extract random card from shuffledCards and check if its not an action card
+      //108-14=94
+      let startingCardIndex = Math.floor(Math.random() * 94);
+
+      while (ACTION_CARDS.includes(shuffledCards[startingCardIndex])) {
+        startingCardIndex = Math.floor(Math.random() * 94);
+      }
+
+      //extract the card from that startingCardIndex into the playedCardsPile
+      const playedCardsPile = shuffledCards.splice(startingCardIndex, 1);
+
+      //store all remaining cards into drawCardPile
+      const drawCardPile = [...shuffledCards];
+
+      //send initial state to server
+      socket.emit("initGameState", {
+        gameOver: false,
+        turn: "Player 1",
+        player1Deck: player1Deck,
+        player2Deck: player2Deck,
+        currentColor: playedCardsPile[0].charAt(1),
+        currentNumber: playedCardsPile[0].charAt(0),
+        playedCardsPile: playedCardsPile,
+        drawCardPile: drawCardPile,
+      });
     }
-
-    //extract the card from that startingCardIndex into the playedCardsPile
-    const playedCardsPile = shuffledCards.splice(startingCardIndex, 1);
-
-    //store all remaining cards into drawCardPile
-    const drawCardPile = [...shuffledCards];
-
-    //send initial state to server
-    socket.emit("initGameState", {
-      gameOver: false,
-      turn: "Player 1",
-      player1Deck: player1Deck,
-      player2Deck: player2Deck,
-      currentColor: playedCardsPile[0].charAt(1),
-      currentNumber: playedCardsPile[0].charAt(0),
-      playedCardsPile: playedCardsPile,
-      drawCardPile: drawCardPile,
-    });
-  }, []);
+  }, [isComputerMode]);
 
   useEffect(() => {
     socket.on(
@@ -243,8 +348,8 @@ const Game = ({ room, currentUser }) => {
       updatedPlayerDeck.push(copiedDrawCardPileArray.pop());
     }
 
-    //Atlast, send new state to server
-    socket.emit("updateGameState", {
+    //Update state locally for computer mode or send to server for multiplayer
+    const newGameState = {
       gameOver: checkGameOver(playerDeck),
       winner: checkWinner(playerDeck, cardPlayedBy),
       turn: turnCopy,
@@ -254,7 +359,23 @@ const Game = ({ room, currentUser }) => {
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
       drawCardPile: copiedDrawCardPileArray,
-    });
+    };
+
+    if (isComputerMode) {
+      // Handle locally for computer mode
+      dispatch(newGameState);
+      
+      // Play appropriate sound
+      numberOfPlayedCard in playSoundMap ? playSoundMap[numberOfPlayedCard]() : playCardPlayedSound();
+      
+      // Check for game over
+      if (newGameState.gameOver) {
+        playGameOverSound();
+      }
+    } else {
+      // Send new state to server for multiplayer mode
+      socket.emit("updateGameState", newGameState);
+    }
   };
 
   //driver functions
@@ -412,24 +533,42 @@ const Game = ({ room, currentUser }) => {
       drawButtonPressed = false;
     }
 
-    //send new state to server
-    socket.emit("updateGameState", {
-      turn: turnCopy,
-      player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
-      player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
-      drawCardPile: copiedDrawCardPileArray,
-      drawButtonPressed,
-    });
+    if (isComputerMode) {
+      // Handle locally for computer mode
+      dispatch({
+        turn: turnCopy,
+        player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
+        player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
+        drawCardPile: copiedDrawCardPileArray,
+        drawButtonPressed,
+      });
+    } else {
+      //send new state to server for multiplayer mode
+      socket.emit("updateGameState", {
+        turn: turnCopy,
+        player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
+        player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
+        drawCardPile: copiedDrawCardPileArray,
+        drawButtonPressed,
+      });
+    }
   };
 
   const onSkipButtonHandler = () => {
     //extract player who skipped
     const cardPlayedBy = turn;
-    //send new state to server
-    socket.emit("updateGameState", {
+    const newState = {
       turn: cardPlayedBy === "Player 1" ? "Player 2" : "Player 1",
       drawButtonPressed: false,
-    });
+    };
+
+    if (isComputerMode) {
+      // Handle locally for computer mode
+      dispatch(newState);
+    } else {
+      // Send new state to server for multiplayer mode
+      socket.emit("updateGameState", newState);
+    }
   };
 
   const handleWinnerReward = async (winnerName) => {
@@ -586,6 +725,7 @@ const Game = ({ room, currentUser }) => {
             playedCardsPile={playedCardsPile}
             drawButtonPressed={drawButtonPressed}
             onSkipButtonHandler={onSkipButtonHandler}
+            isComputerMode={isComputerMode}
             onUnoClicked={() => {
               playUnoSound();
               dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: !isUnoButtonPressed });

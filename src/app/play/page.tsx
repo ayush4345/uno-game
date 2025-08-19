@@ -142,24 +142,87 @@ export default function PlayGame() {
 
         if (socket && socket.current) {
           socket.current.emit("createGameRoom");
-        }
+          }
 
         fetchGames();
         setCreateLoading(false);
       } catch (error) {
         console.error("Failed to create game:", error);
-        setCreateLoading(false);
         toast({
-          title: "Transaction Failed",
-          description: "Failed to create game.",
+          title: "Error",
+          description: "Failed to create game. Please try again.",
           variant: "destructive",
+          duration: 5000,
         });
+      } finally {
+        setCreateLoading(false);
       }
     } else {
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to create a game.",
         variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
+  const startComputerGame = async () => {
+    if (contract && address) {
+      try {
+        setCreateLoading(true);
+
+        console.log("Creating computer game...");
+
+        const tx = await contract.createGame(address as `0x${string}`);
+        const receipt = await tx.wait();
+        console.log("Computer game created successfully:", receipt);
+
+        // Extract gameId from the event logs
+        const gameCreatedEvent = receipt.logs.find(
+          (log: any) => log.fragment && log.fragment.name === "GameCreated"
+        );
+
+        if (gameCreatedEvent) {
+          const gameId = gameCreatedEvent.args[0];
+          console.log("Computer Game ID:", gameId.toString());
+          setGameId(gameId);
+
+          // Emit socket event to create computer game room
+          if (socket.current) {
+            socket.current.emit("createComputerGame", {
+              gameId: gameId.toString(),
+              playerAddress: address
+            });
+            console.log("Socket event emitted for computer game creation");
+          }
+
+          // Navigate to game room with computer mode flag
+          router.push(`/game/${gameId}?mode=computer`);
+        }
+
+        toast({
+          title: "Computer Game Started",
+          description: "Starting game against computer opponent!",
+          duration: 3000,
+        });
+      } catch (error) {
+        console.error("Failed to create computer game:", error);
+        toast({
+          title: "Error",
+          description: "Failed to start computer game. Please try again.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } finally {
+        setCreateLoading(false);
+      }
+    } else {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to play against computer.",
+        variant: "destructive",
+        duration: 5000,
       });
     }
   };
@@ -260,22 +323,22 @@ export default function PlayGame() {
             </div> */}
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Quick Match Card */}
-              <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
+              {/* Quick Match Card - VS Computer */}
+              <div 
+                className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px] cursor-pointer transform transition-transform hover:scale-105 active:scale-95"
+                onClick={startComputerGame}
+              >
                 <div className="absolute top-4 left-4">
                   <div className="w-12 h-12 bg-blue-400/30 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">⚡</span>
+                    <span className="text-2xl">🤖</span>
                   </div>
                 </div>
                 <div className="mt-16">
-                  <h3 className="font-bold text-lg mb-2">Quick Match</h3>
-                  <p className="text-blue-100 text-sm mb-3">Instant play with auto-matching</p>
-                  {/* <div className="flex items-center text-blue-100 text-sm">
-                    <span className="mr-2">👥</span>
-                    <span>{games.length} online</span>
-                  </div> */}
-                    <div className="flex items-center text-blue-100 text-sm">
-                    <span>Coming soon...</span>
+                  <h3 className="font-bold text-lg mb-2">VS Computer</h3>
+                  <p className="text-blue-100 text-sm mb-3">Play against AI opponent</p>
+                  <div className="flex items-center text-blue-100 text-sm">
+                    <span className="mr-2">⚡</span>
+                    <span>Instant play</span>
                   </div>
                 </div>
               </div>

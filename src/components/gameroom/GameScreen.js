@@ -19,6 +19,7 @@ const GameScreen = ({
   onCardDrawnHandler,
   drawButtonPressed,
   onSkipButtonHandler,
+  isComputerMode = false,
 }) => {
   const playerDeck = currentUser === "Player 1" ? player1Deck : player2Deck;
   const opponentDeck = currentUser === "Player 1" ? player2Deck : player1Deck;
@@ -29,7 +30,8 @@ const GameScreen = ({
   
   // Calculate opponent name and avatar
   const opponentName = currentUser === "Player 1" ? "Player 2" : "Player 1";
-  const opponentDisplayName = opponentName === "Player 1" ? "You" : "Opponent";
+  const opponentDisplayName = isComputerMode && opponentName === "Player 2" ? "Computer" : 
+                             opponentName === "Player 1" ? "You" : "Opponent";
   
   return (
     <div className="game-container" style={{
@@ -105,8 +107,12 @@ const GameScreen = ({
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           </div>
-          <div style={{ color: "white", fontWeight: "bold" }}>Opponent</div>
-          <div style={{ color: "#94a3b8", fontSize: "0.875rem" }}>Thinking...</div>
+          <div style={{ color: "white", fontWeight: "bold" }}>
+            {isComputerMode && opponentName === "Player 2" ? "🤖 Computer" : "Opponent"}
+          </div>
+          <div style={{ color: "#94a3b8", fontSize: "0.875rem" }}>
+            {isComputerMode && opponentName === "Player 2" ? "Computing move..." : "Thinking..."}
+          </div>
         </div>
         
         <PlayerViewofOpponent
