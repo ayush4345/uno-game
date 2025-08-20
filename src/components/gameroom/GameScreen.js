@@ -19,6 +19,7 @@ const GameScreen = ({
   onCardDrawnHandler,
   drawButtonPressed,
   onSkipButtonHandler,
+  isComputerMode = false,
 }) => {
   const playerDeck = currentUser === "Player 1" ? player1Deck : player2Deck;
   const opponentDeck = currentUser === "Player 1" ? player2Deck : player1Deck;
@@ -26,137 +27,187 @@ const GameScreen = ({
   const [isMusicMuted, setMusicMuted] = React.useState(true);
   const [playBBgMusic, { pause }] = useSound(bgMusic, { loop: true });
   const router = useRouter();
-  
+
   // Calculate opponent name and avatar
   const opponentName = currentUser === "Player 1" ? "Player 2" : "Player 1";
-  const opponentDisplayName = opponentName === "Player 1" ? "You" : "Opponent";
-  
+  const opponentDisplayName =
+    isComputerMode && opponentName === "Player 2"
+      ? "Computer"
+      : opponentName === "Player 1"
+      ? "You"
+      : "Opponent";
+
   return (
     <div className="game-container" style={{
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      padding: "1rem",
+      padding: "1rem"
     }}>
       {/* Game Header */}
-      <div className="game-header" style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "1rem"
-      }}>
-        <button className="leave-button" style={{
-          background: "transparent",
-          border: "none",
-          color: "#0ea5e9",
-          fontSize: "1.25rem",
+      <div
+        className="game-header"
+        style={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          cursor: "pointer"
+          marginBottom: "1rem",
         }}
-        onClick={() => router.push("/play")}
+      >
+        <button
+          className="leave-button"
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "#0ea5e9",
+            fontSize: "1.25rem",
+            display: "flex",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/play")}
         >
           <span style={{ marginRight: "0.5rem" }}>&lt;</span> Leave
         </button>
-        
+
         <span>
-        <StyledButton className='bg-green-500 mr-2' onClick={toggleMute}>
-          <span className='material-icons'>{isSoundMuted ? "volume_off" : "volume_up"}</span>
-        </StyledButton>
-        <StyledButton
-          className='bg-green-500'
-          onClick={() => {
-            if (isMusicMuted) playBBgMusic();
-            else pause();
-            setMusicMuted(!isMusicMuted);
-          }}
-        >
-          <span className='material-icons'>{isMusicMuted ? "music_off" : "music_note"}</span>
-        </StyledButton>
-      </span>
+          <StyledButton className="bg-green-500 mr-2" onClick={toggleMute}>
+            <span className="material-icons">
+              {isSoundMuted ? "volume_off" : "volume_up"}
+            </span>
+          </StyledButton>
+          <StyledButton
+            className="bg-green-500"
+            onClick={() => {
+              if (isMusicMuted) playBBgMusic();
+              else pause();
+              setMusicMuted(!isMusicMuted);
+            }}
+          >
+            <span className="material-icons">
+              {isMusicMuted ? "music_off" : "music_note"}
+            </span>
+          </StyledButton>
+        </span>
       </div>
 
       {/* Opponent View */}
-      <div className="opponent-section" style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}>
-        <div className="opponent-info" style={{
+      <div
+        className="opponent-section"
+        style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          position: "relative"
-        }}>
-          <div className="avatar" style={{
-            width: "3.5rem",
-            height: "3.5rem",
-            borderRadius: "50%",
-            overflow: "hidden",
-            border: turn === opponentName ? "3px solid #0ea5e9" : "3px solid transparent",
-            marginBottom: "0.5rem"
-          }}>
-            <img 
-              src="/user.png" 
-              alt="Opponent Avatar" 
+          height: "calc(100vh - 100px)",
+        }}
+      >
+        <div
+          className="opponent-info"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          <div
+            className="avatar"
+            style={{
+              width: "3.5rem",
+              height: "3.5rem",
+              borderRadius: "50%",
+              overflow: "hidden",
+              border:
+                turn === opponentName
+                  ? "3px solid #0ea5e9"
+                  : "3px solid transparent",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <img
+              src="/user.png"
+              alt="Opponent Avatar"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
+            {/* </div>
+          <div style={{ color: "white", fontWeight: "bold" }}>
+            {isComputerMode && opponentName === "Player 2" ? "🤖 Computer" : "Opponent"}
+          </div> */}
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "0.875rem",
+                visibility: turn === opponentName ? "visible" : "hidden",
+              }}
+            >
+              {isComputerMode && opponentName === "Player 2"
+                ? "Computing move..."
+                : "Thinking..."}
+            </div>
           </div>
-          {/* <div style={{ color: "white", fontWeight: "bold" }}>Opponent</div> */}
-          <div style={{ color: "#94a3b8", fontSize: "0.875rem", visibility: turn === opponentName ? "visible" : "hidden" }}>Thinking...</div>
-        </div>
-        
-        <PlayerViewofOpponent
-          turn={turn}
-          opponent={opponentName}
-          opponentDeck={opponentDeck}
-        />
-      </div>
 
-      {/* Game Board */}
-      <div className="game-board" style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative"
-      }}>
-        <div className="card-circles" style={{
-          position: "relative",
-          width: "100%",
-          height: "12rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          <div style={{
-            position: "absolute",
-            width: "11rem",
-            height: "11rem",
-            borderRadius: "50%",
-            border: "2px solid rgba(14, 165, 233, 0.3)"
-          }}></div>
-          <div style={{
-            position: "absolute",
-            width: "8rem",
-            height: "8rem",
-            borderRadius: "50%",
-            border: "2px solid rgba(14, 165, 233, 0.2)"
-          }}></div>
-          
-          <CommonView
-            isDrawDisabled={turn !== currentUser || drawButtonPressed}
-            playedCardsPile={playedCardsPile}
-            onCardDrawnHandler={onCardDrawnHandler}
-            isUnoDisabled={turn !== currentUser || playerDeck.length !== 2}
-            onUnoClicked={onUnoClicked}
+          <PlayerViewofOpponent
+            turn={turn}
+            opponent={opponentName}
+            opponentDeck={opponentDeck}
           />
         </div>
-      </div>
 
-      {/* Player View */}
-      <div style={{ display: "flex" }}>
+        {/* Game Board */}
+        <div
+          className="game-board"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            width: "100%",
+          }}
+        >
+          <div
+            className="card-circles"
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "12rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                width: "11rem",
+                height: "11rem",
+                borderRadius: "50%",
+                border: "2px solid rgba(14, 165, 233, 0.3)",
+              }}
+            ></div>
+            <div
+              style={{
+                position: "absolute",
+                width: "8rem",
+                height: "8rem",
+                borderRadius: "50%",
+                border: "2px solid rgba(14, 165, 233, 0.2)",
+              }}
+            ></div>
+
+            <CommonView
+              isDrawDisabled={turn !== currentUser || drawButtonPressed}
+              playedCardsPile={playedCardsPile}
+              onCardDrawnHandler={onCardDrawnHandler}
+              isUnoDisabled={turn !== currentUser || playerDeck.length !== 2}
+              onUnoClicked={onUnoClicked}
+            />
+          </div>
+        </div>
+
+        {/* Player View */}
+        <div style={{ display: "flex" }}>
           <button
             className="skip-button"
             disabled={turn !== currentUser || !drawButtonPressed}
@@ -170,63 +221,88 @@ const GameScreen = ({
               padding: "0.5rem 2rem",
               borderRadius: "0.5rem",
               border: "none",
-              boxShadow: "0 0 15px rgba(225, 29, 72, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3)",
+              boxShadow:
+                "0 0 15px rgba(225, 29, 72, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3)",
               cursor: "pointer",
               transition: "all 0.2s ease",
               opacity: turn !== currentUser || !drawButtonPressed ? "0.6" : "1",
-              pointerEvents: turn !== currentUser || !drawButtonPressed ? "none" : "auto",
+              pointerEvents:
+                turn !== currentUser || !drawButtonPressed ? "none" : "auto",
               position: "relative",
-              overflow: "hidden"
+              overflow: "hidden",
             }}
           >
-            <span style={{
-              position: "absolute",
-              inset: 0,
-              background: "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
-              opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1"
-            }}></span>
+            <span
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
+                opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1",
+              }}
+            ></span>
             SKIP
           </button>
         </div>
-      <div className="player-section" style={{
-        marginTop: "2rem"
-      }}>
-        <div className="player-info" style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "1rem"
-        }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div className="avatar" style={{
-              width: "3rem",
-              height: "3rem",
-              borderRadius: "50%",
-              overflow: "hidden",
-              border: turn === currentUser ? "3px solid #0ea5e9" : "3px solid transparent",
-              marginRight: "1rem"
-            }}>
-              <img 
-                src="/user.png" 
-                alt="Player Avatar" 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-            <div>
-              <div style={{ color: "white", fontWeight: "bold" }}>You</div>
-              <div style={{ color: "#10b981", fontSize: "0.875rem", display: turn === currentUser ? "block" : "none" }}>Your Turn</div>
+        <div
+          className="player-section"
+          style={{
+            marginTop: "2rem",
+          }}
+        >
+          <div
+            className="player-info"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div
+                className="avatar"
+                style={{
+                  width: "3rem",
+                  height: "3rem",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border:
+                    turn === currentUser
+                      ? "3px solid #0ea5e9"
+                      : "3px solid transparent",
+                  marginRight: "1rem",
+                }}
+              >
+                <img
+                  src="/user.png"
+                  alt="Player Avatar"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
+              <div>
+                <div style={{ color: "white", fontWeight: "bold" }}>You</div>
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "0.875rem",
+                    display: turn === currentUser ? "block" : "none",
+                  }}
+                >
+                  Your Turn
+                </div>
+              </div>
             </div>
           </div>
+          <MainPlayerView
+            turn={turn}
+            mainPlayer={currentUser}
+            playerDeck={playerDeck}
+            onCardPlayedHandler={onCardPlayedHandler}
+            isSkipButtonDisabled={turn !== currentUser || !drawButtonPressed}
+            onSkipButtonHandler={onSkipButtonHandler}
+          />
         </div>
-        <MainPlayerView
-          turn={turn}
-          mainPlayer={currentUser}
-          playerDeck={playerDeck}
-          onCardPlayedHandler={onCardPlayedHandler}
-          isSkipButtonDisabled={turn !== currentUser || !drawButtonPressed}
-          onSkipButtonHandler={onSkipButtonHandler}
-        />
-        
       </div>
     </div>
   );

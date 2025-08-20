@@ -142,24 +142,87 @@ export default function PlayGame() {
 
         if (socket && socket.current) {
           socket.current.emit("createGameRoom");
-        }
+          }
 
         fetchGames();
         setCreateLoading(false);
       } catch (error) {
         console.error("Failed to create game:", error);
-        setCreateLoading(false);
         toast({
-          title: "Transaction Failed",
-          description: "Failed to create game.",
+          title: "Error",
+          description: "Failed to create game. Please try again.",
           variant: "destructive",
+          duration: 5000,
         });
+      } finally {
+        setCreateLoading(false);
       }
     } else {
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to create a game.",
         variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
+  const startComputerGame = async () => {
+    if (contract && address) {
+      try {
+        setCreateLoading(true);
+
+        console.log("Creating computer game...");
+
+        const tx = await contract.createGame(address as `0x${string}`);
+        const receipt = await tx.wait();
+        console.log("Computer game created successfully:", receipt);
+
+        // Extract gameId from the event logs
+        const gameCreatedEvent = receipt.logs.find(
+          (log: any) => log.fragment && log.fragment.name === "GameCreated"
+        );
+
+        if (gameCreatedEvent) {
+          const gameId = gameCreatedEvent.args[0];
+          console.log("Computer Game ID:", gameId.toString());
+          setGameId(gameId);
+
+          // Emit socket event to create computer game room
+          if (socket.current) {
+            socket.current.emit("createComputerGame", {
+              gameId: gameId.toString(),
+              playerAddress: address
+            });
+            console.log("Socket event emitted for computer game creation");
+          }
+
+          // Navigate to game room with computer mode flag
+          router.push(`/game/${gameId}?mode=computer`);
+        }
+
+        toast({
+          title: "Computer Game Started",
+          description: "Starting game against computer opponent!",
+          duration: 3000,
+        });
+      } catch (error) {
+        console.error("Failed to create computer game:", error);
+        toast({
+          title: "Error",
+          description: "Failed to start computer game. Please try again.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      } finally {
+        setCreateLoading(false);
+      }
+    } else {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your wallet to play against computer.",
+        variant: "destructive",
+        duration: 5000,
       });
     }
   };
@@ -282,6 +345,7 @@ export default function PlayGame() {
                   background: 'linear-gradient(180deg, #4a9eff 0%, #0069e3 100%)',
                   boxShadow: '0 10px 20px rgba(0, 105, 227, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)'
                 }}
+                onClick={startComputerGame}
               >
                 {/* Glossy shine overlay */}
                 <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
@@ -299,10 +363,10 @@ export default function PlayGame() {
                   {/* Text content */}
                   <div className="mt-auto">
                     <h3 className="font-bold text-xl mb-2 text-white">Quick Match</h3>
-                    <p className="text-white/80 text-sm mb-3">Instant play with auto-matching</p>
-                    <div className="flex items-center text-white/70 text-sm">
+                    <p className="text-white/80 text-sm mb-3">Play against AI opponent</p>
+                    {/* <div className="flex items-center text-white/70 text-sm">
                       <span>Coming soon...</span>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Game from "./Game";
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import socket from "@/services/socket";
 import Header from "./Header";
 import CenterInfo from "./CenterInfo";
@@ -20,6 +20,9 @@ type User = {
 
 const Room = () => {
   const { id } = useParams()
+  const searchParams = useSearchParams()
+  const isComputerMode = searchParams.get('mode') === 'computer'
+  
   //initialize socket state
   const [room] = useState(id);
   const [roomFull, setRoomFull] = useState(false);
@@ -35,16 +38,40 @@ const Room = () => {
   const [playerToStart, setPlayerToStart] = useState<string | null>(null)
   const [playerHand, setPlayerHand] = useState<string[]>([])
 
+  // Initialize computer game - simplified approach
+  const initializeComputerGame = () => {
+    console.log('Initializing computer game...');
+    console.log('Current gameStarted state:', gameStarted);
+    console.log('Setting gameStarted to true...');
+    // Simply start the game - let the Game component handle the rest
+    setGameStarted(true);
+  };
+
   useEffect(() => {
-    socket.emit("join", { room: room }, (error: any) => {
-      if (error) setRoomFull(true);
-    });
+    if (isComputerMode) {
+      // For computer mode, simulate having 2 players immediately
+      setUsers([
+        { id: "player1", name: "Player 1", room: room as string },
+        { id: "computer", name: "Computer", room: room as string }
+      ]);
+      setCurrentUser("Player 1");
+      
+      // Start the game immediately for computer mode
+      console.log('Computer mode detected, starting game immediately');
+      setGameStarted(true);
+    } else {
+      socket.emit("join", { room: room }, (error: any) => {
+        if (error) setRoomFull(true);
+      });
+    }
 
     return function cleanup() {
-      socket.emit("quitRoom");
-      socket.off();
+      if (!isComputerMode) {
+        socket.emit("quitRoom");
+        socket.off();
+      }
     };
-  }, [room]);
+  }, [room, isComputerMode]);
 
   useEffect(() => {
     const setup = async () => {
@@ -262,27 +289,43 @@ const Room = () => {
         width: "100vw",
       }}
     >
-      {users.length < 2 ? (
-        <>
-          <Header roomCode={room} />
-          {currentUser === "Player 2" ? (
-            <CenterInfo msg='Player 1 has left the game' />
+      {isComputerMode ? (
+        // Computer mode - skip waiting and go directly to game
+        (() => {
+          console.log('Rendering computer mode, gameStarted:', gameStarted, 'currentUser:', currentUser);
+          return gameStarted ? (
+            <Game room={room} currentUser={currentUser} isComputerMode={isComputerMode} />
           ) : (
-            <CenterInfo msg='Waiting for Player 2 to join' />
-          )}
-        </>
-      ) : (
-        !gameStarted
-          ? (
             <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
-              <h1 className='topInfoText text-white font-2xl font-bold'>Everyone has joined the game 🎉</h1>
+              <h1 className='topInfoText text-white font-2xl font-bold'>Starting game against Computer 🤖</h1>
               <br />
-              <button onClick={() => handleStartGame()} className='game-button green'>start game</button>
+              <div className="text-white">Preparing your opponent...</div>
             </div>
-          )
-          : (
-            <Game room={room} currentUser={currentUser} />
-          )
+          );
+        })()
+      ) : (
+        users.length < 2 ? (
+          <>
+            <Header roomCode={room} />
+            {currentUser === "Player 2" ? (
+              <CenterInfo msg='Player 1 has left the game' />
+            ) : (
+              <CenterInfo msg='Waiting for Player 2 to join' />
+            )}
+          </>
+        ) : (
+          !gameStarted
+            ? (
+              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+                <h1 className='topInfoText text-white font-2xl font-bold'>Everyone has joined the game 🎉</h1>
+                <br />
+                <button onClick={() => handleStartGame()} className='game-button green'>start game</button>
+              </div>
+            )
+            : (
+              <Game room={room} currentUser={currentUser} isComputerMode={false} />
+            )
+        )
       )}
     </div>
   ) : (
