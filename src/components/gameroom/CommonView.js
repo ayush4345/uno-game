@@ -71,13 +71,13 @@ const CommonView = ({
         >
           <button
             onClick={onUnoClicked}
-            disabled={isUnoDisabled}
+            // disabled={isUnoDisabled}
             style={{
               color: "white",
               fontWeight: "bold",
               fontSize: "1rem",
               width: "6rem",
-              filter: isUnoDisabled ? "grayscale(1)" : "none",
+              // filter: isUnoDisabled ? "grayscale(1)" : "none",
               marginTop: "10rem"
             }}
           >
