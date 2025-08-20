@@ -49,8 +49,14 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-gray-700/50 z-50">
-      <div className="flex items-center justify-around py-2">
+    <div className="fixed bottom-0 left-0 right-0 z-50 overflow-hidden">
+      {/* Glossy background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c29] to-[#302b63] opacity-95 backdrop-blur-md border-t border-white/10"></div>
+      
+      {/* Glossy shine overlay */}
+      {/* <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-transparent to-white/10 pointer-events-none"></div> */}
+      
+      <div className="relative flex items-center justify-around py-3">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           
@@ -58,22 +64,28 @@ export default function BottomNavigation() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors ${
-                isActive 
-                  ? 'bg-blue-500/20' 
-                  : 'hover:bg-gray-800/50'
-              }`}
+              className={`flex flex-col items-center py-2 px-4 rounded-lg transition-all duration-300 ${isActive 
+                ? 'transform scale-110' 
+                : 'hover:scale-105'}`}
             >
-              <div className="w-6 h-6 mb-1">
-                <div className={isActive ? 'text-blue-400' : 'text-gray-400'}>
+              <div className={`w-7 h-7 mb-1 relative ${isActive ? '' : 'opacity-80'}`}>
+                {/* Icon container with glossy effect for active items */}
+                <div className={`absolute inset-0 rounded-full ${isActive ? 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/30' : ''}`}></div>
+                
+                {/* Icon with glow effect when active */}
+                <div className={`relative z-10 p-1 ${isActive 
+                  ? 'text-white drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]' 
+                  : 'text-gray-300'}`}>
                   {item.icon}
                 </div>
+                
+                {/* Shine effect on active icons */}
+                {isActive && <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full"></div>}
               </div>
-              <span className={`text-xs ${
-                isActive 
-                  ? 'text-blue-400 font-medium' 
-                  : 'text-gray-400'
-              }`}>
+              
+              <span className={`text-xs font-medium transition-all ${isActive 
+                ? 'text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]' 
+                : 'text-gray-300'}`}>
                 {item.label}
               </span>
             </Link>

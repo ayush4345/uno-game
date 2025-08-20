@@ -127,7 +127,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
           // Computer plays a card
           onCardPlayedHandler(computerMove);
         }
-      }, 1500); // 1.5 second delay for better UX
+      }, 3000); // 3 second delay for better UX
 
       return () => clearTimeout(computerTurnDelay);
     }
@@ -501,6 +501,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   };
 
   const onCardDrawnHandler = () => {
+    console.log("hii")
     //extract player who drew the card
     let drawButtonPressed = true;
     let turnCopy = turn;
@@ -695,12 +696,12 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     } catch (error) {
       console.error('Error creating claimable balance:', error);
 
-      toast({
-        title: "Error",
-        description: "Something went wrong while creating your reward.",
-        variant: "destructive",
-        duration: 5000,
-      });
+      // toast({
+      //   title: "Error",
+      //   description: "Something went wrong while creating your reward.",
+      //   variant: "destructive",
+      //   duration: 5000,
+      // });
     }
   };
 

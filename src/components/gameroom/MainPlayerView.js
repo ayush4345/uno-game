@@ -45,8 +45,8 @@ const MainPlayerView = ({
               <img
                 style={{
                   pointerEvents: turn !== mainPlayer ? "none" : "auto",
-                  width: "4.5rem",
-                  height: "6.5rem",
+                  width: "3.5rem",
+                  height: "5.5rem",
                   borderRadius: "0.5rem",
                   // boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   cursor: turn === mainPlayer ? "pointer" : "default",
@@ -63,16 +63,6 @@ const MainPlayerView = ({
       </div>
       
       {/* Hide the skip button as it's now handled in the parent */}
-      <div style={{ display: "flex" }}>
-        <StyledButton
-          className='bg-red-500 m-auto'
-          disabled={isSkipButtonDisabled}
-          onClick={onSkipButtonHandler}
-          style={isSkipButtonDisabled ? { pointerEvents: "none" } : null}
-        >
-          SKIP
-        </StyledButton>
-      </div>
     </>
   );
 };
