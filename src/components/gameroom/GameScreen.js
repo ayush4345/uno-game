@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PlayerViewofOpponent from "./PlayerViewofOpponent";
 import CommonView from "./CommonView";
 import MainPlayerView from "./MainPlayerView";
@@ -24,8 +24,9 @@ const GameScreen = ({
   const playerDeck = currentUser === "Player 1" ? player1Deck : player2Deck;
   const opponentDeck = currentUser === "Player 1" ? player2Deck : player1Deck;
   const { isSoundMuted, toggleMute } = useSoundProvider();
-  const [isMusicMuted, setMusicMuted] = React.useState(true);
+  const [isMusicMuted, setMusicMuted] = useState(true);
   const [playBBgMusic, { pause }] = useSound(bgMusic, { loop: true });
+  const [pulseAnimation, setPulseAnimation] = useState(false);
   const router = useRouter();
 
   // Calculate opponent name and avatar
@@ -36,6 +37,13 @@ const GameScreen = ({
       : opponentName === "Player 1"
       ? "You"
       : "Opponent";
+      
+  // Effect for turn animation
+  useEffect(() => {
+    setPulseAnimation(true);
+    const timer = setTimeout(() => setPulseAnimation(false), 500);
+    return () => clearTimeout(timer);
+  }, [turn]);
 
   return (
     <div className="game-container" style={{
@@ -127,15 +135,15 @@ const GameScreen = ({
               height: "2.5rem",
               borderRadius: "50%",
               overflow: "hidden",
-              border:
-                turn === opponentName
-                  ? "3px solid #0ea5e9"
-                  : "3px solid transparent",
+              position: "relative",
               marginBottom: "0.5rem",
+              boxShadow: turn === opponentName ? "0 0 15px 5px rgba(14, 165, 233, 0.7)" : "none",
+              transform: turn === opponentName && pulseAnimation ? "scale(1.1)" : "scale(1)",
+              transition: "all 0.3s ease"
             }}
           >
             <img
-              src="/user.png"
+              src="https://api.dicebear.com/9.x/micah/svg?seed=game"
               alt="Opponent Avatar"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
@@ -205,15 +213,6 @@ const GameScreen = ({
             onClick={onSkipButtonHandler}
             style={{
               margin: "auto",
-              background: "linear-gradient(to bottom, #f43f5e, #e11d48)",
-              color: "white",
-              fontWeight: "bold",
-              fontSize: "1.25rem",
-              padding: "0.5rem 2rem",
-              borderRadius: "0.5rem",
-              border: "none",
-              boxShadow:
-                "0 0 15px rgba(225, 29, 72, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3)",
               cursor: "pointer",
               transition: "all 0.2s ease",
               opacity: turn !== currentUser || !drawButtonPressed ? "0.6" : "1",
@@ -223,7 +222,7 @@ const GameScreen = ({
               overflow: "hidden",
             }}
           >
-            <span
+            {/* <span
               style={{
                 position: "absolute",
                 inset: 0,
@@ -231,14 +230,14 @@ const GameScreen = ({
                   "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
                 opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1",
               }}
-            ></span>
-            SKIP
+            ></span> */}
+            <img src="/images/skip.png" className="w-20" alt="Skip" />
           </button>
         </div>
         <div
           className="player-section"
           style={{
-            marginTop: "2rem",
+            marginTop: "1rem",
           }}
         >
           <div
@@ -257,15 +256,15 @@ const GameScreen = ({
                   height: "3rem",
                   borderRadius: "50%",
                   overflow: "hidden",
-                  border:
-                    turn === currentUser
-                      ? "3px solid #0ea5e9"
-                      : "3px solid transparent",
+                  position: "relative",
                   marginRight: "1rem",
+                  boxShadow: turn === currentUser ? "0 0 20px 8px rgba(14, 165, 233, 0.8)" : "none",
+                  transform: turn === currentUser && pulseAnimation ? "scale(1.1)" : "scale(1)",
+                  transition: "all 0.3s ease"
                 }}
               >
                 <img
-                  src="/user.png"
+                  src="https://api.dicebear.com/9.x/micah/svg?seed=gameboyy"
                   alt="Player Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -277,10 +276,19 @@ const GameScreen = ({
                     color: "#10b981",
                     fontSize: "0.875rem",
                     display: turn === currentUser ? "block" : "none",
+                    animation: turn === currentUser ? "fadeInOut 1.5s infinite" : "none",
+                    fontWeight: "bold"
                   }}
                 >
-                  Your Turn
+                  ✨ Your Turn ✨
                 </div>
+                <style jsx>{`
+                  @keyframes fadeInOut {
+                    0% { opacity: 0.7; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.7; }
+                  }
+                `}</style>
               </div>
             </div>
           </div>
