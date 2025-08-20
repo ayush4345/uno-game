@@ -317,8 +317,8 @@ export default function PlayGame() {
 
       {!isConnected ? (
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
+          <div className="text-center mb-2">
+            <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>
             <p className="text-gray-300 text-lg">Ready to challenge?</p>
           </div>
           <WalletConnection />
@@ -326,9 +326,9 @@ export default function PlayGame() {
       ) : (
         <div className="px-4">
           {/* Welcome Section */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome Back!</h1>
-            <p className="text-gray-300">Ready to challenge?</p>
+          <div className="text-center mb-2">
+            <h1 className="text-xl font-bold">Welcome Back!</h1>
+            <p className="text-gray-300 text-sm">Ready to challenge?</p>
           </div>
 
           {/* Game Modes Section */}
@@ -355,7 +355,7 @@ export default function PlayGame() {
                 <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
                 
                 {/* Content container with padding */}
-                <div className="relative p-6 h-full flex flex-col">
+                <div className="relative p-3 h-full flex flex-col">
                   {/* Icon */}
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
                     <span className="text-2xl text-white">⚡</span>
@@ -393,7 +393,7 @@ export default function PlayGame() {
                 <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
                 
                 {/* Content container with padding */}
-                <div className="relative p-6 h-full flex flex-col">
+                <div className="relative p-3 h-full flex flex-col">
                   {/* Icon */}
                   <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
                     <span className="text-2xl font-bold text-white">+</span>
@@ -451,7 +451,7 @@ export default function PlayGame() {
 
           {/* Available Rooms Section */}
           <div className="mb-24">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold">Available Rooms</h2>
               {/* <button
                 onClick={createGame}

@@ -52,25 +52,34 @@ const GameScreen = ({
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "1rem",
+          position: "absolute"
         }}
       >
         <button
-          className="leave-button"
+          className="glossy-button glossy-button-blue"
           style={{
-            background: "transparent",
-            border: "none",
-            color: "#0ea5e9",
-            fontSize: "1.25rem",
+            minWidth: "56px",
+            height: "28px",
+            fontSize: "0.9rem",
+            fontWeight: "600",
             display: "flex",
             alignItems: "center",
-            cursor: "pointer",
+            justifyContent: "center",
+            gap: "4px",
+            padding: "0 12px",
+            borderRadius: "18px",
+            boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+            transition: "all 0.2s ease",
           }}
           onClick={() => router.push("/play")}
         >
-          <span style={{ marginRight: "0.5rem" }}>&lt;</span> Leave
+          <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M24 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          {/* Back */}
         </button>
 
-        <span>
+        {/* <span>
           <StyledButton className="bg-green-500 mr-2" onClick={toggleMute}>
             <span className="material-icons">
               {isSoundMuted ? "volume_off" : "volume_up"}
@@ -88,7 +97,7 @@ const GameScreen = ({
               {isMusicMuted ? "music_off" : "music_note"}
             </span>
           </StyledButton>
-        </span>
+        </span> */}
       </div>
 
       {/* Opponent View */}
@@ -108,13 +117,14 @@ const GameScreen = ({
             flexDirection: "column",
             alignItems: "center",
             position: "relative",
+            marginBottom: "24px"
           }}
         >
           <div
             className="avatar"
             style={{
-              width: "3.5rem",
-              height: "3.5rem",
+              width: "2.5rem",
+              height: "2.5rem",
               borderRadius: "50%",
               overflow: "hidden",
               border:
@@ -177,25 +187,6 @@ const GameScreen = ({
               justifyContent: "center",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                width: "11rem",
-                height: "11rem",
-                borderRadius: "50%",
-                border: "2px solid rgba(14, 165, 233, 0.3)",
-              }}
-            ></div>
-            <div
-              style={{
-                position: "absolute",
-                width: "8rem",
-                height: "8rem",
-                borderRadius: "50%",
-                border: "2px solid rgba(14, 165, 233, 0.2)",
-              }}
-            ></div>
-
             <CommonView
               isDrawDisabled={turn !== currentUser || drawButtonPressed}
               playedCardsPile={playedCardsPile}
@@ -256,7 +247,6 @@ const GameScreen = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "1rem",
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
