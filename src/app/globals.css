@@ -61,7 +61,7 @@
   position: relative;
   border: none;
   background: transparent;
-  padding: 0;
+  padding: 0 10px;
   cursor: pointer;
   outline-offset: 4px;
   transition: filter 250ms;
