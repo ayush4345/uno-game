@@ -29,6 +29,7 @@ export default function PlayGame() {
   const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [open, setOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [computerCreateLoading, setComputerCreateLoading] = useState(false);
   const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
   const [games, setGames] = useState<BigInt[]>([]);
@@ -170,7 +171,7 @@ export default function PlayGame() {
   const startComputerGame = async () => {
     if (contract && address) {
       try {
-        setCreateLoading(true);
+        setComputerCreateLoading(true);
 
         console.log("Creating computer game...");
 
@@ -201,11 +202,11 @@ export default function PlayGame() {
           router.push(`/game/${gameId}?mode=computer`);
         }
 
-        toast({
-          title: "Computer Game Started",
-          description: "Starting game against computer opponent!",
-          duration: 3000,
-        });
+        // toast({
+        //   title: "Computer Game Started",
+        //   description: "Starting game against computer opponent!",
+        //   duration: 3000,
+        // });
       } catch (error) {
         console.error("Failed to create computer game:", error);
         toast({
@@ -215,7 +216,7 @@ export default function PlayGame() {
           duration: 5000,
         });
       } finally {
-        setCreateLoading(false);
+        setComputerCreateLoading(false);
       }
     } else {
       toast({
@@ -369,6 +370,11 @@ export default function PlayGame() {
                     </div> */}
                   </div>
                 </div>
+                {computerCreateLoading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
+                    <div className="text-white font-medium">Creating...</div>
+                  </div>
+                )}
               </div>
 
               {/* Create Room Card */}
