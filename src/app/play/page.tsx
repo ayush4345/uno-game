@@ -29,6 +29,7 @@ export default function PlayGame() {
   const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [open, setOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
+  const [computerCreateLoading, setComputerCreateLoading] = useState(false);
   const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
   const [games, setGames] = useState<BigInt[]>([]);
@@ -170,7 +171,7 @@ export default function PlayGame() {
   const startComputerGame = async () => {
     if (contract && address) {
       try {
-        setCreateLoading(true);
+        setComputerCreateLoading(true);
 
         console.log("Creating computer game...");
 
@@ -201,11 +202,11 @@ export default function PlayGame() {
           router.push(`/game/${gameId}?mode=computer`);
         }
 
-        toast({
-          title: "Computer Game Started",
-          description: "Starting game against computer opponent!",
-          duration: 3000,
-        });
+        // toast({
+        //   title: "Computer Game Started",
+        //   description: "Starting game against computer opponent!",
+        //   duration: 3000,
+        // });
       } catch (error) {
         console.error("Failed to create computer game:", error);
         toast({
@@ -215,7 +216,7 @@ export default function PlayGame() {
           duration: 5000,
         });
       } finally {
-        setCreateLoading(false);
+        setComputerCreateLoading(false);
       }
     } else {
       toast({
@@ -281,7 +282,22 @@ export default function PlayGame() {
   }, [address]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+    <div
+    className="min-h-screen text-white relative overflow-hidden" 
+    style={{
+    background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' 
+  }}
+    >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-black/10"></div>
+        
+        <div className="absolute top-0 left-0 right-0 h-[30%] bg-gradient-to-b from-purple-500/10 to-transparent"></div>
+        
+        <div className="absolute top-[10%] left-[5%] w-[300px] h-[300px] rounded-full bg-blue-500/20 blur-[100px] animate-pulse"></div>
+        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] rounded-full bg-purple-500/20 blur-[80px] animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-[40%] right-[20%] w-[200px] h-[200px] rounded-full bg-pink-500/10 blur-[60px] animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-12">
         <div className="flex items-center space-x-3">
@@ -301,8 +317,8 @@ export default function PlayGame() {
 
       {!isConnected ? (
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
+          <div className="text-center mb-2">
+            <h1 className="text-4xl font-bold mb-2">Welcome Back!</h1>
             <p className="text-gray-300 text-lg">Ready to challenge?</p>
           </div>
           <WalletConnection />
@@ -310,9 +326,9 @@ export default function PlayGame() {
       ) : (
         <div className="px-4">
           {/* Welcome Section */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome Back!</h1>
-            <p className="text-gray-300">Ready to challenge?</p>
+          <div className="text-center mb-2">
+            <h1 className="text-xl font-bold">Welcome Back!</h1>
+            <p className="text-gray-300 text-sm">Ready to challenge?</p>
           </div>
 
           {/* Game Modes Section */}
@@ -323,43 +339,71 @@ export default function PlayGame() {
             </div> */}
 
             <div className="grid grid-cols-2 gap-4">
-              {/* Quick Match Card - VS Computer */}
+              {/* Quick Match Card */}
               <div 
-                className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px] cursor-pointer transform transition-transform hover:scale-105 active:scale-95"
+                className="rounded-3xl relative overflow-hidden min-h-[160px] cursor-pointer transition-all duration-300 active:translate-y-1 border border-white/10"
+                style={{
+                  background: 'linear-gradient(180deg, #4a9eff 0%, #0069e3 100%)',
+                  boxShadow: '0 10px 20px rgba(0, 105, 227, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)'
+                }}
                 onClick={startComputerGame}
               >
-                <div className="absolute top-4 left-4">
-                  <div className="w-12 h-12 bg-blue-400/30 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🤖</span>
+                {/* Glossy shine overlay */}
+                <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
+                
+                {/* Side shine effect */}
+                <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
+                
+                {/* Content container with padding */}
+                <div className="relative p-3 h-full flex flex-col">
+                  {/* Icon */}
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
+                    <span className="text-2xl text-white">⚡</span>
+                  </div>
+                  
+                  {/* Text content */}
+                  <div className="mt-auto">
+                    <h3 className="font-bold text-xl mb-2 text-white">Quick Match</h3>
+                    <p className="text-white/80 text-sm mb-3">Play against AI opponent</p>
+                    {/* <div className="flex items-center text-white/70 text-sm">
+                      <span>Coming soon...</span>
+                    </div> */}
                   </div>
                 </div>
-                <div className="mt-16">
-                  <h3 className="font-bold text-lg mb-2">VS Computer</h3>
-                  <p className="text-blue-100 text-sm mb-3">Play against AI opponent</p>
-                  <div className="flex items-center text-blue-100 text-sm">
-                    <span className="mr-2">⚡</span>
-                    <span>Instant play</span>
+                {computerCreateLoading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
+                    <div className="text-white font-medium">Creating...</div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Create Room Card */}
               <div 
-                className="bg-gradient-to-br from-orange-500 to-red-500 rounded-3xl p-6 relative overflow-hidden min-h-[160px] cursor-pointer transform transition-transform hover:scale-105 active:scale-95" 
+                className="rounded-3xl relative overflow-hidden min-h-[160px] cursor-pointer transition-all duration-300 active:translate-y-1 border border-white/10"
                 onClick={createGame}
+                style={{
+                  background: 'linear-gradient(180deg, #ff5a87 0%, #e3003a 100%)',
+                  boxShadow: '0 10px 20px rgba(227, 0, 58, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)'
+                }}
               >
-                <div className="absolute top-4 left-4">
-                  <div className="w-12 h-12 bg-orange-400/30 rounded-full flex items-center justify-center">
-                    <span className="text-2xl font-bold">+</span>
+                {/* Glossy shine overlay */}
+                <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
+                
+                {/* Side shine effect */}
+                <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
+                
+                {/* Content container with padding */}
+                <div className="relative p-3 h-full flex flex-col">
+                  {/* Icon */}
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
+                    <span className="text-2xl font-bold text-white">+</span>
                   </div>
-                </div>
-                <div className="mt-16">
-                  <h3 className="font-bold text-lg mb-2">Create Room</h3>
-                  <p className="text-orange-100 text-sm mb-3">Custom settings & invite friends</p>
-                  {/* <div className="flex items-center text-orange-100 text-sm">
-                    <span className="mr-2">⚙️</span>
-                    <span>Full customization</span>
-                  </div> */}
+                  
+                  {/* Text content */}
+                  <div className="mt-auto">
+                    <h3 className="font-bold text-xl mb-2 text-white">Create Room</h3>
+                    <p className="text-white/80 text-sm mb-3">Custom settings & invite friends</p>
+                  </div>
                 </div>
                 {createLoading && (
                   <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
@@ -407,15 +451,15 @@ export default function PlayGame() {
 
           {/* Available Rooms Section */}
           <div className="mb-24">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-2">
               <h2 className="text-xl font-bold">Available Rooms</h2>
-              <button
+              {/* <button
                 onClick={createGame}
                 disabled={createLoading}
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
               >
                 {createLoading ? "Creating..." : "+ Create"}
-              </button>
+              </button> */}
             </div>
             
             {games.length > 0 ? (
@@ -444,15 +488,15 @@ export default function PlayGame() {
                 <button
                   onClick={createGame}
                   disabled={createLoading}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 active:scale-95"
+                  className={`glossy-button glossy-button-red transition-all duration-300 ${createLoading ? 'opacity-70' : ''}`}
                 >
-                  {createLoading ? "Creating Room..." : "Create First Room"}
+                  {createLoading ? "Creating Room..." : "Create Room"}
                 </button>
               </div>
             )}
           </div>
         </div>
-      )} 
+      )}
       
       <BottomNavigation />
       

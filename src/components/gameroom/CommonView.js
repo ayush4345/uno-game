@@ -18,7 +18,7 @@ const CommonView = ({
           onClick={onCardDrawnHandler}
           style={isDrawDisabled ? {pointerEvents: "none"} : null}
         > */}
-        <div
+        <button
           className="draw-deck"
           style={{
             left: "1rem",
@@ -26,31 +26,17 @@ const CommonView = ({
             flexDirection: "column",
             alignItems: "center",
             pointerEvents: isDrawDisabled ? "none" : "auto",
+            filter: isDrawDisabled ? "grayscale(1)" : "none",
+            width: "6rem",
+            marginTop: "10rem"
           }}
           role="button"
           disabled={isDrawDisabled}
           onClick={onCardDrawnHandler}
         >
-          <div
-            style={{
-              width: "4rem",
-              height: "6rem",
-              backgroundColor: "#334155",
-              borderRadius: "0.5rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "semibold",
-              boxShadow:
-                "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-              marginBottom: "0.5rem",
-            }}
-          >
-            <span style={{ fontSize: "1.5rem", color: "#0ea5e9" }}>+</span>
-          </div>
-          <div style={{ color: "white", fontSize: "0.875rem" }}>Draw Deck</div>
-        </div>
+          <img src="/images/draw.png" alt="draw" />
+          <div style={{ color: "white", fontSize: "0.875rem", fontWeight: "bold" }}>Draw Deck</div>
+        </button>
       {playedCardsPile && playedCardsPile.length > 0 && (
         <div style={{
           position: "absolute",
@@ -85,19 +71,17 @@ const CommonView = ({
         >
           <button
             onClick={onUnoClicked}
-            disabled={isUnoDisabled}
+            // disabled={isUnoDisabled}
             style={{
-              backgroundColor: isUnoDisabled ? "#f97316" : "#475569",
               color: "white",
               fontWeight: "bold",
-              padding: "0.75rem 1rem",
-              borderRadius: "9999px",
-              border: "none",
               fontSize: "1rem",
-              boxShadow: "0 0 15px #FF6B35",
+              width: "6rem",
+              // filter: isUnoDisabled ? "grayscale(1)" : "none",
+              marginTop: "10rem"
             }}
           >
-            ZUNNO
+            <img src="/images/zunno-button.png" alt="uno" />
           </button>
         </div>
       </div>

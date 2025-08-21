@@ -6,12 +6,12 @@ export async function GET(request: NextRequest) {
     frame: {
       name: "Zunno",
       homeUrl: "https://zunno.xyz",
-      iconUrl: "https://zunno.xyz/logo.jpg",
+      iconUrl: "https://zunno.xyz/images/logo.jpeg",
       version: "1",
       subtitle: "leading game hub",
       description:
         "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
-      splashImageUrl: "https://zunno.xyz/logo.jpg",
+      splashImageUrl: "https://zunno.xyz/images/logo.jpeg",
       primaryCategory: "games",
       splashBackgroundColor: "#0000a8",
       screenshotUrls: [

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PlayerViewofOpponent from "./PlayerViewofOpponent";
 import CommonView from "./CommonView";
 import MainPlayerView from "./MainPlayerView";
@@ -24,187 +24,283 @@ const GameScreen = ({
   const playerDeck = currentUser === "Player 1" ? player1Deck : player2Deck;
   const opponentDeck = currentUser === "Player 1" ? player2Deck : player1Deck;
   const { isSoundMuted, toggleMute } = useSoundProvider();
-  const [isMusicMuted, setMusicMuted] = React.useState(true);
+  const [isMusicMuted, setMusicMuted] = useState(true);
   const [playBBgMusic, { pause }] = useSound(bgMusic, { loop: true });
+  const [pulseAnimation, setPulseAnimation] = useState(false);
   const router = useRouter();
-  
+
   // Calculate opponent name and avatar
   const opponentName = currentUser === "Player 1" ? "Player 2" : "Player 1";
-  const opponentDisplayName = isComputerMode && opponentName === "Player 2" ? "Computer" : 
-                             opponentName === "Player 1" ? "You" : "Opponent";
-  
+  const opponentDisplayName =
+    isComputerMode && opponentName === "Player 2"
+      ? "Computer"
+      : opponentName === "Player 1"
+      ? "You"
+      : "Opponent";
+      
+  // Effect for turn animation
+  useEffect(() => {
+    setPulseAnimation(true);
+    const timer = setTimeout(() => setPulseAnimation(false), 500);
+    return () => clearTimeout(timer);
+  }, [turn]);
+
   return (
     <div className="game-container" style={{
-      background: "#0f172a", 
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
       padding: "1rem"
     }}>
       {/* Game Header */}
-      <div className="game-header" style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "1rem"
-      }}>
-        <button className="leave-button" style={{
-          background: "transparent",
-          border: "none",
-          color: "#0ea5e9",
-          fontSize: "1.25rem",
+      <div
+        className="game-header"
+        style={{
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          cursor: "pointer"
+          marginBottom: "1rem",
+          position: "absolute"
         }}
-        onClick={() => router.push("/play")}
-        >
-          <span style={{ marginRight: "0.5rem" }}>&lt;</span> Leave
-        </button>
-        
-        <span>
-        <StyledButton className='bg-green-500 mr-2' onClick={toggleMute}>
-          <span className='material-icons'>{isSoundMuted ? "volume_off" : "volume_up"}</span>
-        </StyledButton>
-        <StyledButton
-          className='bg-green-500'
-          onClick={() => {
-            if (isMusicMuted) playBBgMusic();
-            else pause();
-            setMusicMuted(!isMusicMuted);
+      >
+        <button
+          className="glossy-button glossy-button-blue"
+          style={{
+            minWidth: "56px",
+            height: "28px",
+            fontSize: "0.9rem",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "4px",
+            padding: "0 12px",
+            borderRadius: "18px",
+            boxShadow: "0 8px 16px rgba(0, 105, 227, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)",
+            transition: "all 0.2s ease",
           }}
+          onClick={() => router.push("/play")}
         >
-          <span className='material-icons'>{isMusicMuted ? "music_off" : "music_note"}</span>
-        </StyledButton>
-      </span>
+          <svg width="24" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M24 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          {/* Back */}
+        </button>
+
+        {/* <span>
+          <StyledButton className="bg-green-500 mr-2" onClick={toggleMute}>
+            <span className="material-icons">
+              {isSoundMuted ? "volume_off" : "volume_up"}
+            </span>
+          </StyledButton>
+          <StyledButton
+            className="bg-green-500"
+            onClick={() => {
+              if (isMusicMuted) playBBgMusic();
+              else pause();
+              setMusicMuted(!isMusicMuted);
+            }}
+          >
+            <span className="material-icons">
+              {isMusicMuted ? "music_off" : "music_note"}
+            </span>
+          </StyledButton>
+        </span> */}
       </div>
 
       {/* Opponent View */}
-      <div className="opponent-section" style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        marginBottom: "2rem"
-      }}>
-        <div className="opponent-info" style={{
+      <div
+        className="opponent-section"
+        style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          marginBottom: "1rem",
-          position: "relative"
-        }}>
-          <div className="avatar" style={{
-            width: "3.5rem",
-            height: "3.5rem",
-            borderRadius: "50%",
-            overflow: "hidden",
-            border: turn === opponentName ? "3px solid #0ea5e9" : "3px solid transparent",
-            marginBottom: "0.5rem"
-          }}>
-            <img 
-              src="/user.png" 
-              alt="Opponent Avatar" 
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </div>
-          <div style={{ color: "white", fontWeight: "bold" }}>
-            {isComputerMode && opponentName === "Player 2" ? "🤖 Computer" : "Opponent"}
-          </div>
-          <div style={{ color: "#94a3b8", fontSize: "0.875rem" }}>
-            {isComputerMode && opponentName === "Player 2" ? "Computing move..." : "Thinking..."}
-          </div>
-        </div>
-        
-        <PlayerViewofOpponent
-          turn={turn}
-          opponent={opponentName}
-          opponentDeck={opponentDeck}
-        />
-      </div>
-
-      {/* Game Board */}
-      <div className="game-board" style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative"
-      }}>
-        <div className="card-circles" style={{
-          position: "relative",
-          width: "100%",
-          height: "12rem",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }}>
-          <div style={{
-            position: "absolute",
-            width: "11rem",
-            height: "11rem",
-            borderRadius: "50%",
-            border: "2px solid rgba(14, 165, 233, 0.3)"
-          }}></div>
-          <div style={{
-            position: "absolute",
-            width: "8rem",
-            height: "8rem",
-            borderRadius: "50%",
-            border: "2px solid rgba(14, 165, 233, 0.2)"
-          }}></div>
-          
-          <CommonView
-            isDrawDisabled={turn !== currentUser || drawButtonPressed}
-            playedCardsPile={playedCardsPile}
-            onCardDrawnHandler={onCardDrawnHandler}
-            isUnoDisabled={turn !== currentUser || playerDeck.length !== 2}
-            onUnoClicked={onUnoClicked}
-          />
-        </div>
-      </div>
-
-      {/* Player View */}
-      <div className="player-section" style={{
-        marginTop: "2rem"
-      }}>
-        <div className="player-info" style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "1rem"
-        }}>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div className="avatar" style={{
-              width: "3rem",
-              height: "3rem",
+          height: "calc(100vh - 100px)",
+        }}
+      >
+        <div
+          className="opponent-info"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "relative",
+            marginBottom: "24px"
+          }}
+        >
+          <div
+            className="avatar"
+            style={{
+              width: "2.5rem",
+              height: "2.5rem",
               borderRadius: "50%",
               overflow: "hidden",
-              border: turn === currentUser ? "3px solid #0ea5e9" : "3px solid transparent",
-              marginRight: "1rem"
-            }}>
-              <img 
-                src="/user.png" 
-                alt="Player Avatar" 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-            <div>
-              <div style={{ color: "white", fontWeight: "bold" }}>You</div>
-              <div style={{ color: "#10b981", fontSize: "0.875rem", display: turn === currentUser ? "block" : "none" }}>Your Turn</div>
+              position: "relative",
+              marginBottom: "0.5rem",
+              boxShadow: turn === opponentName ? "0 0 15px 5px rgba(14, 165, 233, 0.7)" : "none",
+              transform: turn === opponentName && pulseAnimation ? "scale(1.1)" : "scale(1)",
+              transition: "all 0.3s ease"
+            }}
+          >
+            <img
+              src="https://api.dicebear.com/9.x/micah/svg?seed=game"
+              alt="Opponent Avatar"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+            {/* </div>
+          <div style={{ color: "white", fontWeight: "bold" }}>
+            {isComputerMode && opponentName === "Player 2" ? "🤖 Computer" : "Opponent"}
+          </div> */}
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "0.875rem",
+                visibility: turn === opponentName ? "visible" : "hidden",
+              }}
+            >
+              {isComputerMode && opponentName === "Player 2"
+                ? "Computing move..."
+                : "Thinking..."}
             </div>
           </div>
+
+          <PlayerViewofOpponent
+            turn={turn}
+            opponent={opponentName}
+            opponentDeck={opponentDeck}
+          />
         </div>
-        
-        <MainPlayerView
-          turn={turn}
-          mainPlayer={currentUser}
-          playerDeck={playerDeck}
-          onCardPlayedHandler={onCardPlayedHandler}
-          isSkipButtonDisabled={turn !== currentUser || !drawButtonPressed}
-          onSkipButtonHandler={onSkipButtonHandler}
-        />
-        
+
+        {/* Game Board */}
+        <div
+          className="game-board"
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            width: "100%",
+          }}
+        >
+          <div
+            className="card-circles"
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "12rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <CommonView
+              isDrawDisabled={turn !== currentUser || drawButtonPressed}
+              playedCardsPile={playedCardsPile}
+              onCardDrawnHandler={onCardDrawnHandler}
+              isUnoDisabled={turn !== currentUser || playerDeck.length !== 2}
+              onUnoClicked={onUnoClicked}
+            />
+          </div>
+        </div>
+
+        {/* Player View */}
+        <div style={{ display: "flex" }}>
+          <button
+            className="skip-button"
+            disabled={turn !== currentUser || !drawButtonPressed}
+            onClick={onSkipButtonHandler}
+            style={{
+              margin: "auto",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              opacity: turn !== currentUser || !drawButtonPressed ? "0.6" : "1",
+              pointerEvents:
+                turn !== currentUser || !drawButtonPressed ? "none" : "auto",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* <span
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
+                opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1",
+              }}
+            ></span> */}
+            <img src="/images/skip.png" className="w-20" alt="Skip" />
+          </button>
+        </div>
+        <div
+          className="player-section"
+          style={{
+            marginTop: "1rem",
+          }}
+        >
+          <div
+            className="player-info"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div
+                className="avatar"
+                style={{
+                  width: "3rem",
+                  height: "3rem",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  position: "relative",
+                  marginRight: "1rem",
+                  boxShadow: turn === currentUser ? "0 0 20px 8px rgba(14, 165, 233, 0.8)" : "none",
+                  transform: turn === currentUser && pulseAnimation ? "scale(1.1)" : "scale(1)",
+                  transition: "all 0.3s ease"
+                }}
+              >
+                <img
+                  src="https://api.dicebear.com/9.x/micah/svg?seed=gameboyy"
+                  alt="Player Avatar"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
+              <div>
+                <div style={{ color: "white", fontWeight: "bold" }}>You</div>
+                <div
+                  style={{
+                    color: "#10b981",
+                    fontSize: "0.875rem",
+                    display: turn === currentUser ? "block" : "none",
+                    animation: turn === currentUser ? "fadeInOut 1.5s infinite" : "none",
+                    fontWeight: "bold"
+                  }}
+                >
+                  ✨ Your Turn ✨
+                </div>
+                <style jsx>{`
+                  @keyframes fadeInOut {
+                    0% { opacity: 0.7; }
+                    50% { opacity: 1; }
+                    100% { opacity: 0.7; }
+                  }
+                `}</style>
+              </div>
+            </div>
+          </div>
+          <MainPlayerView
+            turn={turn}
+            mainPlayer={currentUser}
+            playerDeck={playerDeck}
+            onCardPlayedHandler={onCardPlayedHandler}
+            isSkipButtonDisabled={turn !== currentUser || !drawButtonPressed}
+            onSkipButtonHandler={onSkipButtonHandler}
+          />
+        </div>
       </div>
     </div>
   );
