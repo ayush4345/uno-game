@@ -251,7 +251,7 @@ const Room = () => {
     try {
       console.log('Starting game on contract...')
       
-      // await contract.startGame(gameId)
+      await contract.startGame(gameId)
 
       console.log('Game started on contract')
 
