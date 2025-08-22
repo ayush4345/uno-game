@@ -16,9 +16,9 @@ const miniappConfig = {
     title: "Start Game",
     action: {
       type: "launch_miniapp",
-      url: "https://zunno.xyz/images/logo.jpeg",
+      url: "https://zunno.xyz/images/logo.png",
       name: "Zunno",
-      splashImageUrl: "https://zunno.xyz/images/logo.jpeg",
+      splashImageUrl: "https://zunno.xyz/images/logo.png",
       splashBackgroundColor: "#0000a8"
     }
   }
@@ -34,7 +34,7 @@ const frameConfig = {
       type: "launch_frame",
       name: "Zunno",
       url: "https://uno-game-pi.vercel.app/",
-      splashImageUrl: "https://zunno.xyz/images/logo.jpeg",
+      splashImageUrl: "https://zunno.xyz/images/logo.png",
       splashBackgroundColor: "#0000a8"
     }
   }

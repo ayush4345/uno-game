@@ -22,7 +22,7 @@ const Hero = () => {
       "title": "LEVEL UP NEW",
       "subtitle": "EXPERIENCE",
       "image": "/images/hero-1.png",
-      "logo": "/images/logo.jpeg"
+      "logo": "/images/logo.png"
     }
 
   return (
