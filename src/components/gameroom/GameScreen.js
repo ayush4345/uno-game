@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PlayerViewofOpponent from "./PlayerViewofOpponent";
 import CommonView from "./CommonView";
 import MainPlayerView from "./MainPlayerView";
@@ -27,6 +27,9 @@ const GameScreen = ({
   const [isMusicMuted, setMusicMuted] = useState(true);
   const [playBBgMusic, { pause }] = useSound(bgMusic, { loop: true });
   const [pulseAnimation, setPulseAnimation] = useState(false);
+  const [skipTimer, setSkipTimer] = useState(null);
+  const [skipTimeRemaining, setSkipTimeRemaining] = useState(10);
+  const skipTimerRef = useRef(null);
   const router = useRouter();
 
   // Calculate opponent name and avatar
@@ -44,6 +47,46 @@ const GameScreen = ({
     const timer = setTimeout(() => setPulseAnimation(false), 500);
     return () => clearTimeout(timer);
   }, [turn]);
+
+  // Effect for skip timer
+  useEffect(() => {
+    // Start timer when draw button is pressed and it's the current user's turn
+    if (turn === currentUser && drawButtonPressed) {
+      setSkipTimer(true);
+      setSkipTimeRemaining(10);
+      
+      // Clear any existing timer
+      if (skipTimerRef.current) clearInterval(skipTimerRef.current);
+      
+      // Start countdown
+      skipTimerRef.current = setInterval(() => {
+        setSkipTimeRemaining(prev => {
+          if (prev <= 1) {
+            // Time's up - auto skip
+            clearInterval(skipTimerRef.current);
+            onSkipButtonHandler();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      // Clear timer when it's not the user's turn or draw button is not pressed
+      setSkipTimer(false);
+      if (skipTimerRef.current) {
+        clearInterval(skipTimerRef.current);
+        skipTimerRef.current = null;
+      }
+    }
+    
+    // Cleanup function
+    return () => {
+      if (skipTimerRef.current) {
+        clearInterval(skipTimerRef.current);
+        skipTimerRef.current = null;
+      }
+    };
+  }, [turn, currentUser, drawButtonPressed, onSkipButtonHandler]);
 
   return (
     <div className="game-container" style={{
@@ -206,8 +249,8 @@ const GameScreen = ({
         </div>
 
         {/* Player View */}
-        <div style={{ display: "flex" }}>
-          <button
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* <button
             className="skip-button"
             disabled={turn !== currentUser || !drawButtonPressed}
             onClick={onSkipButtonHandler}
@@ -222,17 +265,30 @@ const GameScreen = ({
               overflow: "hidden",
             }}
           >
-            {/* <span
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%)",
-                opacity: turn !== currentUser || !drawButtonPressed ? "0" : "1",
-              }}
-            ></span> */}
             <img src="/images/skip.png" className="w-20" alt="Skip" />
-          </button>
+          </button> */}
+          
+          {skipTimer && (
+            <div 
+              className="skip-timer"
+              style={{
+                marginTop: "8px",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                color: skipTimeRemaining <= 5 ? "#ef4444" : "#10b981",
+                animation: skipTimeRemaining <= 5 ? "pulse 1s infinite" : "none",
+              }}
+            >
+              Auto-skip in {skipTimeRemaining}s
+              <style jsx>{`
+                @keyframes pulse {
+                  0% { opacity: 0.7; }
+                  50% { opacity: 1; }
+                  100% { opacity: 0.7; }
+                }
+              `}</style>
+            </div>
+          )}
         </div>
         <div
           className="player-section"

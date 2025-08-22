@@ -357,13 +357,13 @@ export default function PlayGame() {
                 {/* Content container with padding */}
                 <div className="relative p-3 h-full flex flex-col">
                   {/* Icon */}
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
+                  {/* <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
                     <span className="text-2xl text-white">⚡</span>
-                  </div>
+                  </div> */}
                   
                   {/* Text content */}
                   <div className="mt-auto">
-                    <h3 className="font-bold text-xl mb-2 text-white">Quick Match</h3>
+                    <h3 className="font-bold text-2xl mb-2 text-white">Quick Match</h3>
                     <p className="text-white/80 text-sm mb-3">Play against AI opponent</p>
                     {/* <div className="flex items-center text-white/70 text-sm">
                       <span>Coming soon...</span>
@@ -395,13 +395,13 @@ export default function PlayGame() {
                 {/* Content container with padding */}
                 <div className="relative p-3 h-full flex flex-col">
                   {/* Icon */}
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
+                  {/* <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
                     <span className="text-2xl font-bold text-white">+</span>
-                  </div>
+                  </div> */}
                   
                   {/* Text content */}
                   <div className="mt-auto">
-                    <h3 className="font-bold text-xl mb-2 text-white">Create Room</h3>
+                    <h3 className="font-bold text-2xl mb-2 text-white">Create Room</h3>
                     <p className="text-white/80 text-sm mb-3">Custom settings & invite friends</p>
                   </div>
                 </div>
