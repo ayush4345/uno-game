@@ -22,7 +22,7 @@ const Hero = () => {
       "title": "LEVEL UP NEW",
       "subtitle": "EXPERIENCE",
       "image": "/images/hero-1.png",
-      "logo": "/logo.jpg"
+      "logo": "/images/logo.jpeg"
     }
 
   return (
@@ -48,7 +48,7 @@ const Hero = () => {
               height={60}
               className="mb-4 rounded-full"
             />
-            <p className="text-white/80 text-lg">A UNO Game on Blockchain</p>
+            <p className="text-white/80 text-lg">Blockchain's 1st Uno game</p>
           </div>
 
           {/* <div className="space-y-2">

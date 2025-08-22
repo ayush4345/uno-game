@@ -303,7 +303,7 @@ export default function PlayGame() {
         <div className="flex items-center space-x-3">
           <div className="w-16 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <Link href="/">
-              <img src="/logo.jpg" alt="" />
+              <img src="/images/logo.jpeg" alt="" />
             </Link>
           </div>
         </div>
@@ -327,8 +327,8 @@ export default function PlayGame() {
         <div className="px-4">
           {/* Welcome Section */}
           <div className="text-center mb-2">
-            <h1 className="text-xl font-bold">Welcome Back!</h1>
-            <p className="text-gray-300 text-sm">Ready to challenge?</p>
+            <h1 className="text-2xl font-bold">Welcome Back!</h1>
+            <p className="text-gray-300 text-sm mb-1">Ready to challenge?</p>
           </div>
 
           {/* Game Modes Section */}

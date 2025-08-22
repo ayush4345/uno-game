@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
       homeUrl: "https://zunno.xyz",
       iconUrl: "https://zunno.xyz/images/logo.jpeg",
       version: "1",
-      subtitle: "leading game hub",
+      subtitle: "Blockchain's 1st Uno game",
       description:
         "Zunno is a cutting-edge, multiplayer digital adaptation of the classic UNO game",
       splashImageUrl: "https://zunno.xyz/images/logo.jpeg",

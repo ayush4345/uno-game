@@ -12,7 +12,7 @@ function Header({ roomCode }) {
         <div className="flex items-center space-x-3">
           <div className="w-16 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
             <Link href="/">
-              <img src="/logo.jpg" alt="" />
+              <img src="/images/logo.jpeg" alt="" />
             </Link>
           </div>
         </div>
