@@ -30,6 +30,10 @@ const GameScreen = ({
   const [skipTimer, setSkipTimer] = useState(null);
   const [skipTimeRemaining, setSkipTimeRemaining] = useState(10);
   const skipTimerRef = useRef(null);
+  
+  // Turn timer state
+  const [turnTimeRemaining, setTurnTimeRemaining] = useState(10);
+  const turnTimerRef = useRef(null);
   const router = useRouter();
 
   // Calculate opponent name and avatar
@@ -47,6 +51,48 @@ const GameScreen = ({
     const timer = setTimeout(() => setPulseAnimation(false), 500);
     return () => clearTimeout(timer);
   }, [turn]);
+  
+  // Effect for turn timer
+  useEffect(() => {
+    // Reset timer when turn changes
+    setTurnTimeRemaining(10);
+    
+    // Clear any existing timer
+    if (turnTimerRef.current) {
+      clearInterval(turnTimerRef.current);
+      turnTimerRef.current = null;
+    }
+    
+    // Start new timer
+    turnTimerRef.current = setInterval(() => {
+      setTurnTimeRemaining(prev => {
+        if (prev <= 1) {
+          // Time's up - auto change turn
+          clearInterval(turnTimerRef.current);
+          turnTimerRef.current = null;
+          
+          // If it's the current user's turn and they've drawn a card, skip
+          if (turn === currentUser && drawButtonPressed) {
+            onSkipButtonHandler();
+          } 
+          // Otherwise, draw a card and potentially skip
+          else if (turn === currentUser) {
+            onCardDrawnHandler();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    // Cleanup function
+    return () => {
+      if (turnTimerRef.current) {
+        clearInterval(turnTimerRef.current);
+        turnTimerRef.current = null;
+      }
+    };
+  }, [turn, currentUser, drawButtonPressed, onSkipButtonHandler, onCardDrawnHandler]);
 
   // Effect for skip timer
   useEffect(() => {
@@ -172,28 +218,58 @@ const GameScreen = ({
           }}
         >
           <div
-            className="avatar"
+            className="avatar-container"
             style={{
               width: "2.5rem",
               height: "2.5rem",
-              borderRadius: "50%",
-              overflow: "hidden",
               position: "relative",
               marginBottom: "0.5rem",
-              boxShadow: turn === opponentName ? "0 0 15px 5px rgba(14, 165, 233, 0.7)" : "none",
-              transform: turn === opponentName && pulseAnimation ? "scale(1.1)" : "scale(1)",
-              transition: "all 0.3s ease"
             }}
           >
+            {turn === opponentName && (
+              <svg 
+                width="2.5rem" 
+                height="2.5rem" 
+                viewBox="0 0 100 100"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  transform: "rotate(-90deg)",
+                  zIndex: 1
+                }}
+              >
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="48"
+                  fill="none"
+                  stroke="rgba(4, 81, 214, 0.8)"
+                  strokeWidth="8"
+                  strokeDasharray={`${(turnTimeRemaining/10) * 301.6} 301.6`} // 301.6 is approx 2*PI*48 (circumference)
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+            <div
+              className="avatar"
+              style={{
+                width: "2.5rem",
+                height: "2.5rem",
+                borderRadius: "50%",
+                overflow: "hidden",
+                position: "relative",
+                boxShadow: turn === opponentName ? "0 0 15px 5px rgba(14, 165, 233, 0.7)" : "none",
+                transform: turn === opponentName && pulseAnimation ? "scale(1.1)" : "scale(1)",
+                transition: "all 0.3s ease",
+                zIndex: 2
+              }}
+            >
             <img
               src="https://api.dicebear.com/9.x/micah/svg?seed=game"
               alt="Opponent Avatar"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
-            {/* </div>
-          <div style={{ color: "white", fontWeight: "bold" }}>
-            {isComputerMode && opponentName === "Player 2" ? "🤖 Computer" : "Opponent"}
-          </div> */}
             <div
               style={{
                 color: "#94a3b8",
@@ -202,8 +278,9 @@ const GameScreen = ({
               }}
             >
               {isComputerMode && opponentName === "Player 2"
-                ? "Computing move..."
-                : "Thinking..."}
+                ? `Computing move... (${turnTimeRemaining}s)`
+                : `Thinking... (${turnTimeRemaining}s)`}
+            </div>
             </div>
           </div>
 
@@ -270,23 +347,23 @@ const GameScreen = ({
           
           {skipTimer && (
             <div 
-              className="skip-timer"
-              style={{
-                marginTop: "8px",
-                fontSize: "1rem",
-                fontWeight: "bold",
-                color: skipTimeRemaining <= 5 ? "#ef4444" : "#10b981",
-                animation: skipTimeRemaining <= 5 ? "pulse 1s infinite" : "none",
-              }}
+              // className="skip-timer"
+              // style={{
+              //   marginTop: "8px",
+              //   fontSize: "1rem",
+              //   fontWeight: "bold",
+              //   color: skipTimeRemaining <= 5 ? "#ef4444" : "#10b981",
+              //   animation: skipTimeRemaining <= 5 ? "pulse 1s infinite" : "none",
+              // }}
             >
-              Auto-skip in {skipTimeRemaining}s
+              {/* Auto-skip in {skipTimeRemaining}s
               <style jsx>{`
                 @keyframes pulse {
                   0% { opacity: 0.7; }
                   50% { opacity: 1; }
                   100% { opacity: 0.7; }
                 }
-              `}</style>
+              `}</style> */}
             </div>
           )}
         </div>
@@ -306,24 +383,59 @@ const GameScreen = ({
           >
             <div style={{ display: "flex", alignItems: "center" }}>
               <div
-                className="avatar"
+                className="avatar-container"
                 style={{
                   width: "3rem",
                   height: "3rem",
-                  borderRadius: "50%",
-                  overflow: "hidden",
                   position: "relative",
                   marginRight: "1rem",
-                  boxShadow: turn === currentUser ? "0 0 20px 8px rgba(14, 165, 233, 0.8)" : "none",
-                  transform: turn === currentUser && pulseAnimation ? "scale(1.1)" : "scale(1)",
-                  transition: "all 0.3s ease"
                 }}
               >
+                {turn === currentUser && (
+                  <svg 
+                    width="3rem" 
+                    height="3rem" 
+                    viewBox="0 0 100 100"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      transform: "rotate(-90deg)",
+                      zIndex: 1
+                    }}
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="48"
+                      fill="none"
+                      stroke="rgba(4, 81, 214, 0.8)"
+                      strokeWidth="8"
+                      strokeDasharray={`${(turnTimeRemaining/10) * 301.6} 301.6`} // 301.6 is approx 2*PI*48 (circumference)
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+                <div
+                  className="avatar"
+                  style={{
+                    width: "3rem",
+                    height: "3rem",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    position: "relative",
+                    boxShadow: turn === currentUser ? "0 0 20px 8px rgba(14, 165, 233, 0.8)" : "none",
+                    transform: turn === currentUser && pulseAnimation ? "scale(1.1)" : "scale(1)",
+                    transition: "all 0.3s ease",
+                    zIndex: 2
+                  }}
+                >
                 <img
                   src="https://api.dicebear.com/9.x/micah/svg?seed=gameboyy"
                   alt="Player Avatar"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
+                </div>
               </div>
               <div>
                 <div style={{ color: "white", fontWeight: "bold" }}>You</div>
@@ -336,7 +448,7 @@ const GameScreen = ({
                     fontWeight: "bold"
                   }}
                 >
-                  ✨ Your Turn ✨
+                  ✨ Your Turn ({turnTimeRemaining}s) ✨
                 </div>
                 <style jsx>{`
                   @keyframes fadeInOut {
