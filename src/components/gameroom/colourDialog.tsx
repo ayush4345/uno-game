@@ -1,8 +1,5 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog'; // Adjust the import path as needed
-import { Label } from '../ui/label';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
 interface ColourDialogProps {
     onSubmit: (color: string) => void;
@@ -11,44 +8,50 @@ interface ColourDialogProps {
 }
 
 const ColourDialog: React.FC<ColourDialogProps> = ({ onSubmit, onClose, isDialogOpen }) => {
-    const [colorInput, setColorInput] = useState('');
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-        console.log(colorInput)
-        onSubmit(colorInput.toUpperCase());
-        setColorInput('');
+    const handleColorSelect = (color: string) => {
+        onSubmit(color);
         onClose();
     };
-    console.log(isDialogOpen)
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (open == false) { onClose() } }}>
-            <DialogContent className='top-[10%]'>
-                <DialogHeader>
-                    <DialogTitle>Card colour</DialogTitle>
-                    <DialogDescription>Choose a colour for the card</DialogDescription>
+            <DialogContent className='bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-500/50 shadow-xl shadow-indigo-500/20 rounded-xl'>
+                <DialogHeader className='text-center'>
+                    <DialogTitle className='text-2xl font-bold text-white'>Select Card Color</DialogTitle>
+                    <DialogDescription className='text-indigo-200'>Choose a color for your wild card</DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
-                        <div className="grid grid-rows-2 grid-cols-4 items-center gap-4 justify-items-center">
-                            <Label htmlFor="color" className="text-right col-span-4 row-start-1 row-end-1s">
-                                Enter first letter of new color (r/g/b/y)
-                            </Label>
-                            <Input
-                                id="color"
-                                className="col-span-4 row-start-2"
-                                placeholder="r"
-                                value={colorInput}
-                                onChange={(e) => setColorInput(e.target.value)}
-                                maxLength={1}
-                            />
-                        </div>
+                <div className="grid gap-6 py-6">
+                    <div className="grid grid-cols-2 gap-6 justify-items-center">
+                        <button
+                            onClick={() => handleColorSelect('R')}
+                            className="w-24 h-24 rounded-lg hover:scale-105 transition-all"
+                            aria-label="Red"
+                        >
+                            <img src="/images/red.png"/>
+                        </button>
+                        <button
+                            onClick={() => handleColorSelect('G')}
+                            className="w-24 h-24 rounded-lg hover:scale-105 transition-all"
+                            aria-label="Green"
+                        >
+                            <img src="/images/green.png"/>
+                        </button>
+                        <button
+                            onClick={() => handleColorSelect('B')}
+                            className="w-24 h-24 rounded-lg hover:scale-105 transition-all"
+                            aria-label="Blue"
+                        >
+                            <img src="/images/blue.png"/>
+                            </button>
+                        <button
+                            onClick={() => handleColorSelect('Y')}
+                            className="w-24 h-24 rounded-lg hover:scale-105 transition-all"
+                            aria-label="Yellow"
+                        >
+                            <img src="/images/yellow.png"/>
+                        </button>
                     </div>
-                    <DialogFooter>
-                        <Button type="submit">Submit</Button>
-                    </DialogFooter>
-                </form>
+                </div>
             </DialogContent>
         </Dialog>
     );

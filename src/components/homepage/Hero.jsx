@@ -46,7 +46,7 @@ const Hero = () => {
               alt="Zunno Logo"
               width={200}
               height={60}
-              className="mb-4 rounded-full"
+              className="rounded-full"
             />
             <p className="text-white/80 text-lg">Blockchain's 1st Uno game</p>
           </div>
