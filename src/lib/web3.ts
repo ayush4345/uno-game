@@ -21,7 +21,7 @@ async function verifyContract(provider: ethers.Provider, address: string) {
 
 export async function getContractNew() {
   try {
-    const rpcUrl = 'https://rpc-campnetwork.xyz';
+    const rpcUrl = 'https://sepolia.base.org';
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const KEY = process.env.NEXT_PUBLIC_PRIVATE_KEY;
 

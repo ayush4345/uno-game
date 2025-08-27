@@ -49,7 +49,7 @@ export default function BottomNavigation() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 overflow-hidden">
+    <div className="fixed bottom-0 left-0 right-0 z-20 overflow-hidden">
       {/* Glossy background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c29] to-[#302b63] opacity-95 backdrop-blur-md border-t border-white/10"></div>
       
