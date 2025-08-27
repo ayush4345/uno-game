@@ -92,7 +92,8 @@ const GameScreen = ({
         turnTimerRef.current = null;
       }
     };
-  }, [turn, currentUser, drawButtonPressed, onSkipButtonHandler, onCardDrawnHandler]);
+  // Only reset timer when turn or game state changes, not when Uno button is clicked
+  }, [turn, currentUser, drawButtonPressed]);  // Removed onSkipButtonHandler and onCardDrawnHandler from dependencies
 
   // Effect for skip timer
   useEffect(() => {
@@ -441,7 +442,7 @@ const GameScreen = ({
                 <div style={{ color: "white", fontWeight: "bold" }}>You</div>
                 <div
                   style={{
-                    color: "#10b981",
+                    color: "white",
                     fontSize: "0.875rem",
                     display: turn === currentUser ? "block" : "none",
                     animation: turn === currentUser ? "fadeInOut 1.5s infinite" : "none",

@@ -444,20 +444,37 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       case "W":
       case "D4W":
         {
-          //ask for new color
-          setIsDialogOpen(true);
-          setDialogCallback(() => (colorOfPlayedCard) => {
-            if (!colorOfPlayedCard) return;
+          // For computer player, randomly select a color
+          if (isComputerMode && cardPlayedBy === "Player 2") {
+            // Available colors: R, G, B, Y
+            const colors = ['R', 'G', 'B', 'Y'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
             const cardDetails = {
               cardPlayedBy,
               played_card,
-              colorOfPlayedCard,
+              colorOfPlayedCard: randomColor,
               numberOfPlayedCard: played_card === 'W' ? 500 : 400,
               isDraw4: played_card === 'D4W',
               toggleTurn: played_card !== 'D4W',
             };
             cardPlayedByPlayer(cardDetails);
-          });
+          } else {
+            //ask for new color via dialog for human players
+            setIsDialogOpen(true);
+            setDialogCallback(() => (colorOfPlayedCard) => {
+              if (!colorOfPlayedCard) return;
+              const cardDetails = {
+                cardPlayedBy,
+                played_card,
+                colorOfPlayedCard,
+                numberOfPlayedCard: played_card === 'W' ? 500 : 400,
+                isDraw4: played_card === 'D4W',
+                toggleTurn: played_card !== 'D4W',
+              };
+              cardPlayedByPlayer(cardDetails);
+            });
+          }
           break;
         }
       //if card played was a draw four wild card
@@ -501,7 +518,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   };
 
   const onCardDrawnHandler = () => {
-    console.log("hii")
     //extract player who drew the card
     let drawButtonPressed = true;
     let turnCopy = turn;
