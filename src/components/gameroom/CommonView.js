@@ -31,7 +31,7 @@ const CommonView = ({
             marginTop: "10rem"
           }}
           role="button"
-          disabled={isDrawDisabled}
+          // disabled={isDrawDisabled}
           onClick={onCardDrawnHandler}
         >
           <img src="/images/draw.png" alt="draw" />
