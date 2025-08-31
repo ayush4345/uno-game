@@ -15,7 +15,7 @@ const ColourDialog: React.FC<ColourDialogProps> = ({ onSubmit, onClose, isDialog
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (open == false) { onClose() } }}>
-            <DialogContent className='bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-500/50 shadow-xl shadow-indigo-500/20 rounded-xl'>
+            <DialogContent className='w-3/4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-500/50 shadow-xl shadow-indigo-500/20 rounded-xl'>
                 <DialogHeader className='text-center'>
                     <DialogTitle className='text-2xl font-bold text-white'>Select Card Color</DialogTitle>
                     <DialogDescription className='text-indigo-200'>Choose a color for your wild card</DialogDescription>

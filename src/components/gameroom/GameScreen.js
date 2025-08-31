@@ -34,6 +34,7 @@ const GameScreen = ({
   // Turn timer state
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(10);
   const turnTimerRef = useRef(null);
+  const [unoClicked, setUnoClicked] = useState(false);
   const router = useRouter();
 
   // Calculate opponent name and avatar
@@ -56,6 +57,7 @@ const GameScreen = ({
   useEffect(() => {
     // Reset timer when turn changes
     setTurnTimeRemaining(10);
+    setUnoClicked(false); // Reset uno clicked state when turn changes
     
     // Clear any existing timer
     if (turnTimerRef.current) {
@@ -71,13 +73,16 @@ const GameScreen = ({
           clearInterval(turnTimerRef.current);
           turnTimerRef.current = null;
           
-          // If it's the current user's turn and they've drawn a card, skip
-          if (turn === currentUser && drawButtonPressed) {
-            onSkipButtonHandler();
-          } 
-          // Otherwise, draw a card and potentially skip
-          else if (turn === currentUser) {
-            onCardDrawnHandler();
+          // Only execute timeout actions if Uno button wasn't clicked
+          if (!unoClicked) {
+            // If it's the current user's turn and they've drawn a card, skip
+            if (turn === currentUser && drawButtonPressed) {
+              onSkipButtonHandler();
+            } 
+            // Otherwise, draw a card and potentially skip
+            else if (turn === currentUser) {
+              onCardDrawnHandler();
+            }
           }
           return 0;
         }
@@ -93,7 +98,7 @@ const GameScreen = ({
       }
     };
   // Only reset timer when turn or game state changes, not when Uno button is clicked
-  }, [turn, currentUser, drawButtonPressed]);  // Removed onSkipButtonHandler and onCardDrawnHandler from dependencies
+  }, [turn, currentUser, drawButtonPressed, unoClicked]);  // Added unoClicked to dependencies
 
   // Effect for skip timer
   useEffect(() => {
@@ -317,11 +322,19 @@ const GameScreen = ({
             }}
           >
             <CommonView
-              isDrawDisabled={turn !== currentUser || drawButtonPressed}
+              isDrawDisabled={turn !== currentUser}
               playedCardsPile={playedCardsPile}
               onCardDrawnHandler={onCardDrawnHandler}
               isUnoDisabled={turn !== currentUser || playerDeck.length !== 2}
-              onUnoClicked={onUnoClicked}
+              onUnoClicked={() => {
+                setUnoClicked(true);
+                // Clear the turn timer when Uno is clicked
+                if (turnTimerRef.current) {
+                  clearInterval(turnTimerRef.current);
+                  turnTimerRef.current = null;
+                }
+                onUnoClicked();
+              }}
             />
           </div>
         </div>

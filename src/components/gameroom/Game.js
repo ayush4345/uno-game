@@ -383,6 +383,9 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     //extract player who played the card
     const cardPlayedBy = turn;
 
+    // Reset Uno button when any card is played
+    dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false });
+
     // Update the last player who played a card
     dispatch({
       lastCardPlayedBy: cardPlayedBy
@@ -744,8 +747,11 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
             onSkipButtonHandler={onSkipButtonHandler}
             isComputerMode={isComputerMode}
             onUnoClicked={() => {
-              playUnoSound();
-              dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: !isUnoButtonPressed });
+              // Only allow setting Uno to true if it's not already pressed
+              if (!isUnoButtonPressed) {
+                playUnoSound();
+                dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: true });
+              }
             }}
           />
           {isDialogOpen && (
