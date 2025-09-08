@@ -11,6 +11,8 @@ import { useUserAccount } from '@/userstate/useUserAccount';
 import { getContractNew } from '../../lib/web3'
 import { applyActionToOffChainState, hashAction, startGame, storePlayerHand, getPlayerHand, createDeck, hashCard, initializeOffChainState } from '../../lib/gameLogic'
 import { updateGlobalCardHashMap } from '../../lib/globalState';
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
+import UnoGameABI from '@/constants/UnoGame.json';
 
 type User = { 
   id: string;
@@ -30,8 +32,15 @@ const Room = () => {
   const [currentUser, setCurrentUser] = useState<User["name"]>("");
   const [gameStarted, setGameStarted] = useState(false);
   const { account, bytesAddress } = useUserAccount();
+  const { address } = useAccount();
   const [contract, setContract] = useState<UnoGameContract | null>(null)
   const [gameId, setGameId] = useState<bigint | null>(null)
+  
+  // Wagmi contract write hooks
+  const { writeContract, data: hash, error: txError, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const [offChainGameState, setOffChainGameState] = useState<OffChainGameState | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -241,8 +250,8 @@ const Room = () => {
   }
 
   const handleStartGame = async () => {
-    console.log('Starting game with:', { contract, account, offChainGameState, gameId })
-    if (!contract || !account || !offChainGameState || !gameId) {
+    console.log('Starting game with:', { address, account, offChainGameState, gameId })
+    if (!address || !account || !offChainGameState || !gameId) {
       console.error('Missing required data to start game')
       setError('Missing required data to start game')
       return
@@ -251,10 +260,25 @@ const Room = () => {
     try {
       console.log('Starting game on contract...')
       
-      await contract.startGame(gameId)
+      // Use writeContract to require user signature
+      writeContract({
+        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+        abi: UnoGameABI.abi,
+        functionName: 'startGame',
+        args: [gameId],
+      });
 
-      console.log('Game started on contract')
+    } catch (error) {
+      console.error('Failed to start game:', error)
+      setError('Failed to start game')
+    }
+  }
 
+  // Handle successful game start after transaction confirmation
+  const initializeGameAfterStart = () => {
+    if (!offChainGameState || !bytesAddress) return
+
+    try {
       console.log('Initializing local game state...')
       const newState = startGame(offChainGameState, socket)
       console.log('New State:', newState)
@@ -280,6 +304,22 @@ const Room = () => {
       setError('Failed to start game. Please try again.')
     }
   }
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && hash) {
+      console.log('Game start transaction confirmed with hash:', hash)
+      initializeGameAfterStart()
+    }
+  }, [isConfirmed, hash])
+
+  // Handle transaction error
+  useEffect(() => {
+    if (txError) {
+      console.error('Game start transaction error:', txError)
+      setError('Failed to start game transaction. Please try again.')
+    }
+  }, [txError])
 
   return !roomFull ? (
     <div
