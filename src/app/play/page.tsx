@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UnoGameContract } from "@/lib/types";
 import { getContractNew } from "@/lib/web3";
+import UnoGameABI from "@/constants/UnoGame.json";
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
@@ -14,10 +15,14 @@ import {
   useAccount,
   useConnect,
   useWalletClient,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useReadContract,
 } from "wagmi";
 import BottomNavigation from "@/components/BottomNavigation";
 import GameCard from "./gameCard";
 import Link from "next/link";
+import { useChains } from 'wagmi'
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
@@ -34,11 +39,18 @@ export default function PlayGame() {
   const [gameId, setGameId] = useState<BigInt | null>(null);
   const [games, setGames] = useState<BigInt[]>([]);
   const router = useRouter();
+  const chains = useChains();
 
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
+  
+  // Wagmi contract write hooks
+  const { writeContract, data: hash, error, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const socket = useRef<Socket | null>(null);
 
@@ -46,6 +58,26 @@ export default function PlayGame() {
 
   // Using Wagmi hooks for wallet connection
   const { connect, connectors } = useConnect();
+
+  // Use Wagmi to read contract data
+  const { data: activeGames, refetch: refetchGames } = useReadContract({
+    address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+    abi: UnoGameABI.abi,
+    functionName: 'getNotStartedGames',
+    query: {
+      enabled: !!address, // Only fetch when wallet is connected
+      refetchInterval: 10000, // Refetch every 10 seconds
+      refetchOnWindowFocus: true, // Refetch when user returns to tab
+    }
+  });
+
+  // Update games state when activeGames changes
+  useEffect(() => {
+    if (activeGames) {
+      console.log("Active games:", activeGames);
+      setGames(activeGames as BigInt[]);
+    }
+  }, [activeGames]);
 
   async function handleConnectWallet() {
     try {
@@ -72,19 +104,6 @@ export default function PlayGame() {
     }
   }
 
-  const fetchGames = async () => {
-    if (contract) {
-      try {
-        console.log("Fetching active games...");
-        const activeGames = await contract.getNotStartedGames();
-        console.log("Active games:", activeGames);
-        setGames(activeGames);
-      } catch (error) {
-        console.error("Failed to fetch games:", error);
-      }
-    }
-  };
-
   useEffect(() => {
     if (!socket.current) {
       socket.current = io(CONNECTION, {
@@ -96,29 +115,22 @@ export default function PlayGame() {
   }, [socket]);
 
   useEffect(() => {
-    if (contract) {
-      console.log("Contract initialized, calling fetchGames"); // Add this line
-      fetchGames();
+    if (socket.current) {
+      console.log("Socket connection established");
+      // Add listener for gameRoomCreated event
+      socket.current.on("gameRoomCreated", () => {
+        console.log("Game room created event received");
+        refetchGames();
+      });
 
-      if (socket.current) {
-        console.log("Socket connection established");
-        // Add listener for gameRoomCreated event
-        socket.current.on("gameRoomCreated", () => {
-          console.log("Game room created event received"); // Add this line
-          fetchGames();
-        });
-
-        // Cleanup function
-        return () => {
-          if (socket.current) {
-            socket.current.off("gameRoomCreated");
-          }
-        };
-      }
-    } else {
-      console.log("Contract not initialized yet"); // Add this line
+      // Cleanup function
+      return () => {
+        if (socket.current) {
+          socket.current.off("gameRoomCreated");
+        }
+      };
     }
-  }, [contract, socket]);
+  }, [socket, refetchGames]);
 
   const ISSERVER = typeof window === "undefined";
 
@@ -127,44 +139,36 @@ export default function PlayGame() {
   };
 
   const createGame = async () => {
-    console.log(contract);
-    console.log(address);
-    if (contract && address) {
-      try {
-        setCreateLoading(true);
-
-        console.log("Creating game...");
-
-        // Using Wagmi address directly with the contract
-        const tx = await contract.createGame(address as `0x${string}`);
-        console.log("Transaction hash:", tx.hash);
-        await tx.wait();
-        console.log("Game created successfully");
-
-        if (socket && socket.current) {
-          socket.current.emit("createGameRoom");
-          }
-
-        fetchGames();
-        setCreateLoading(false);
-      } catch (error) {
-        console.error("Failed to create game:", error);
-        toast({
-          title: "Error",
-          description: "Failed to create game. Please try again.",
-          variant: "destructive",
-          duration: 5000,
-        });
-      } finally {
-        setCreateLoading(false);
-      }
-    } else {
+    if (!address) {
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to create a game.",
         variant: "destructive",
         duration: 5000,
       });
+      return;
+    }
+
+    try {
+      setCreateLoading(true);
+      console.log("Creating game...");
+
+      // Use writeContract to require user signature
+      writeContract({
+        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+        abi: UnoGameABI.abi,
+        functionName: 'createGame',
+        args: [address as `0x${string}`],
+      });
+    } catch (error) {
+      console.error("Failed to create game:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create game. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+      setCreateLoading(false);
     }
   };
 
@@ -229,35 +233,35 @@ export default function PlayGame() {
   };
 
   const joinGame = async (gameId: BigInt) => {
-    if (contract && address) {
-      try {
-        setJoiningGameId(gameId);
-
-        console.log(`Joining game ${gameId.toString()}...`);
-
-        const gameIdBigint = BigInt(gameId.toString());
-        // Using Wagmi address directly
-        const tx = await contract.joinGame(gameIdBigint, address as `0x${string}`);
-        console.log("Transaction hash:", tx.hash);
-        await tx.wait();
-
-        console.log("Joined game successfully");
-        router.push(`/game/${gameId.toString()}`);
-      } catch (error) {
-        console.error("Failed to join game:", error);
-        setJoiningGameId(null);
-        toast({
-          title: "Transaction Failed",
-          description: "Failed to join game.",
-          variant: "destructive",
-        });
-      }
-    } else {
-      setJoiningGameId(null);
+    if (!address) {
       toast({
         title: "Wallet Not Connected",
         description: "Please connect your wallet to join a game.",
         variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
+    try {
+      setJoiningGameId(gameId);
+      console.log(`Joining game ${gameId.toString()}...`);
+
+      // Use writeContract to require user signature
+      writeContract({
+        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+        abi: UnoGameABI.abi,
+        functionName: 'joinGame',
+        args: [BigInt(gameId.toString()), address as `0x${string}`],
+      });
+    } catch (error) {
+      console.error("Failed to join game:", error);
+      setJoiningGameId(null);
+      toast({
+        title: "Error",
+        description: "Failed to join game. Please try again.",
+        variant: "destructive",
+        duration: 5000,
       });
     }
   };
@@ -280,6 +284,64 @@ export default function PlayGame() {
       setContract(null);
     }
   }, [address]);
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && hash) {
+      console.log("Transaction confirmed with hash:", hash);
+      
+      // Check if this was a create game transaction
+      if (createLoading) {
+        console.log("Game created successfully");
+        
+        if (socket && socket.current) {
+          socket.current.emit("createGameRoom");
+        }
+        
+        refetchGames();
+        setCreateLoading(false);
+        
+        toast({
+          title: "Success",
+          description: "Game created successfully!",
+          duration: 3000,
+        });
+      }
+      
+      // Check if this was a join game transaction
+      if (joiningGameId !== null) {
+        console.log(`Joined game ${joiningGameId.toString()} successfully`);
+        
+        const gameIdToJoin = joiningGameId;
+        setJoiningGameId(null);
+        
+        toast({
+          title: "Success", 
+          description: "Joined game successfully!",
+          duration: 3000,
+        });
+        
+        // Navigate to the game room
+        router.push(`/game/${gameIdToJoin.toString()}`);
+      }
+    }
+  }, [isConfirmed, hash, createLoading, joiningGameId]);
+
+  // Handle transaction error
+  useEffect(() => {
+    if (error) {
+      console.error("Transaction error:", error);
+      setCreateLoading(false);
+      setJoiningGameId(null);
+      
+      toast({
+        title: "Transaction Failed",
+        description: error.message || "Transaction failed. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  }, [error]);
 
   return (
     <div
