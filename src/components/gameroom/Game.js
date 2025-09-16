@@ -10,7 +10,7 @@ import ColourDialog from "./colourDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useAccount, useWalletClient } from "wagmi";
-import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
+// import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
 import { getContractNew } from "../../lib/web3";
 import { ethers } from "ethers";
 

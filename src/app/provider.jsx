@@ -7,7 +7,6 @@ import RecoilProvider from "../userstate/RecoilProvider";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import { MiniKitContextProvider } from "../providers/MiniKitProvider";
 import { base, baseSepolia } from "wagmi/chains";
-import { CampProvider } from "@campnetwork/origin/react";
 
 const queryClient = new QueryClient();
 
@@ -16,7 +15,6 @@ export function Providers({ children }) {
     <QueryClientProvider client={queryClient}>
       <RecoilProvider>
         <WagmiProvider config={config}>
-        <CampProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
           {/* <OnchainKitProvider
             chain={baseSepolia}
             config={{
@@ -32,7 +30,6 @@ export function Providers({ children }) {
           > */}
           <MiniKitContextProvider>{children}</MiniKitContextProvider>
           {/* </OnchainKitProvider> */}
-          </CampProvider>
           </WagmiProvider>
       </RecoilProvider>
     </QueryClientProvider>
