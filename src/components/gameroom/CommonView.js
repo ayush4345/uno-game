@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import StyledButton from "../styled-button";
 
 const CommonView = ({
@@ -8,6 +8,19 @@ const CommonView = ({
   onUnoClicked,
   isUnoDisabled,
 }) => {
+  const [isDrawing, setIsDrawing] = useState(false);
+  
+  const handleDrawCard = () => {
+    if (isDrawing) return; // Prevent multiple clicks
+    
+    setIsDrawing(true);
+    onCardDrawnHandler();
+    
+    // Re-enable the button after a short delay
+    setTimeout(() => {
+      setIsDrawing(false);
+    }, 500);
+  };
   return (
     <div style={{ position: "relative", width: "100%" }}>
       {/* Hide the buttons as they're now handled in the parent component */}
@@ -25,14 +38,14 @@ const CommonView = ({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            pointerEvents: isDrawDisabled ? "none" : "auto",
-            filter: isDrawDisabled ? "grayscale(1)" : "none",
+            pointerEvents: (isDrawDisabled || isDrawing) ? "none" : "auto",
+            filter: (isDrawDisabled || isDrawing) ? "grayscale(1)" : "none",
             width: "6rem",
             marginTop: "10rem"
           }}
           role="button"
-          disabled={isDrawDisabled}
-          onClick={onCardDrawnHandler}
+          disabled={isDrawDisabled || isDrawing}
+          onClick={handleDrawCard}
         >
           <img src="/images/draw.png" alt="draw" />
           <div style={{ color: "white", fontSize: "0.875rem", fontWeight: "bold" }}>Draw Deck</div>
