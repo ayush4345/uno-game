@@ -103,7 +103,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       // Otherwise play a regular card
       return validMoves[0];
     } else {
-      // Draw a card if no valid moves
+      // Draw a card if no valid moves - with new rule, computer will always draw one card and end turn
       return "draw";
     }
   };
@@ -121,7 +121,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         const computerMove = computerMakeMove();
         
         if (computerMove === "draw") {
-          // Computer draws a card
+          // Computer draws a card and automatically ends turn (as per new rule)
           onCardDrawnHandler();
         } else {
           // Computer plays a card
@@ -522,8 +522,9 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
   const onCardDrawnHandler = () => {
     //extract player who drew the card
-    let drawButtonPressed = true;
-    let turnCopy = turn;
+    // let drawButtonPressed = true;
+    // let turnCopy = turn;
+    let drawButtonPressed = false; // Always set to false to disable draw button after drawing
     //remove 1 new card from drawCardPile and send it to playerDrawn method
     const copiedDrawCardPileArray = [...drawCardPile];
     //pull out last element from it
@@ -543,15 +544,19 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       numberOfDrawnCard = 200;
     }
 
-    if (
-      drawCard !== "W" &&
-      drawCard !== "D4W" &&
-      currentNumber !== numberOfDrawnCard &&
-      currentColor !== colorOfDrawnCard
-    ) {
-      turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
-      drawButtonPressed = false;
-    }
+    // if (
+    //   drawCard !== "W" &&
+    //   drawCard !== "D4W" &&
+    //   currentNumber !== numberOfDrawnCard &&
+    //   currentColor !== colorOfDrawnCard
+    // ) {
+    //   turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+    //   drawButtonPressed = false;
+    // }
+    
+    // Modified rule: Always pass turn after drawing a card
+    // regardless of whether the drawn card is playable or not
+    const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
 
     if (isComputerMode) {
       // Handle locally for computer mode
