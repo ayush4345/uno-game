@@ -103,6 +103,12 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       // Otherwise play a regular card
       return validMoves[0];
     } else {
+      // Check if draw pile is empty and needs reshuffling
+      if (drawCardPile.length === 0 && playedCardsPile.length > 1) {
+        // Don't need to actually reshuffle here, as that will happen in onCardDrawnHandler
+        console.log('Computer notices draw pile is empty, will trigger reshuffle on draw');
+      }
+      
       // Draw a card if no valid moves - with new rule, computer will always draw one card and end turn
       return "draw";
     }
@@ -315,20 +321,61 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
     //remove the played card from player's deck and add it to playedCardsPile and update their deck(immutably)
     const removeIndex = playerDeck.indexOf(played_card);
-    const updatedPlayedCardsPile = [...playedCardsPile, played_card];
     let updatedPlayerDeck = [...playerDeck.slice(0, removeIndex), ...playerDeck.slice(removeIndex + 1)];
 
     //make a drawcardpile copy for managing draw2,draw4 and UNO penalty
-    const copiedDrawCardPileArray = [...drawCardPile];
+    let copiedDrawCardPileArray = [...drawCardPile];
+    let updatedPlayedCardsPile = [...playedCardsPile, played_card];
     let opponentDeckCopy = [...opponentDeck];
+    
+    // Helper function to draw a card with reshuffle if needed
+    const drawCardWithReshuffle = () => {
+      // Check if draw pile is empty and needs reshuffling
+      if (copiedDrawCardPileArray.length === 0) {
+        // Keep the top card (the one just played)
+        const topCard = updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
+        
+        // Take all other cards from the discard pile
+        const cardsToReshuffle = updatedPlayedCardsPile.slice(0, updatedPlayedCardsPile.length - 1);
+        
+        // If we have cards to reshuffle
+        if (cardsToReshuffle.length > 0) {
+          // Shuffle these cards
+          copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
+          updatedPlayedCardsPile = [topCard];
+          
+          // Play shuffling sound
+          playShufflingSound();
+          
+          console.log('Reshuffled discard pile into draw pile during penalty. New draw pile size:', copiedDrawCardPileArray.length);
+        }
+      }
+      
+      // Draw a card if possible
+      if (copiedDrawCardPileArray.length > 0) {
+        return copiedDrawCardPileArray.pop();
+      }
+      
+      return null; // No card available
+    };
+    
     // if it is a draw2 or draw4 move pop cards from drawCardPile
     // and add them to opponent's deck (immutably)
     if (isDraw2 || isDraw4) {
-      opponentDeckCopy.push(copiedDrawCardPileArray.pop());
-      opponentDeckCopy.push(copiedDrawCardPileArray.pop());
+      // Draw 2 cards for Draw 2
+      const card1 = drawCardWithReshuffle();
+      if (card1) opponentDeckCopy.push(card1);
+      
+      const card2 = drawCardWithReshuffle();
+      if (card2) opponentDeckCopy.push(card2);
+      
+      // Draw 2 more cards for Draw 4
       if (isDraw4) {
-        opponentDeckCopy.push(copiedDrawCardPileArray.pop());
-        opponentDeckCopy.push(copiedDrawCardPileArray.pop());
+        const card3 = drawCardWithReshuffle();
+        if (card3) opponentDeckCopy.push(card3);
+        
+        const card4 = drawCardWithReshuffle();
+        if (card4) opponentDeckCopy.push(card4);
       }
     }
 
@@ -343,9 +390,12 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     //if not then add 2 cards as penalty else continue
     if (playerDeck.length === 2 && !isUnoButtonPressed) {
       alert("Oops! You forgot to press UNO. You drew 2 cards as penalty.");
-      //pull out last two cards from dracard pile and add them to player1's deck
-      updatedPlayerDeck.push(copiedDrawCardPileArray.pop());
-      updatedPlayerDeck.push(copiedDrawCardPileArray.pop());
+      //pull out last two cards from draw card pile and add them to player's deck
+      const penaltyCard1 = drawCardWithReshuffle();
+      if (penaltyCard1) updatedPlayerDeck.push(penaltyCard1);
+      
+      const penaltyCard2 = drawCardWithReshuffle();
+      if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
     }
 
     //Update state locally for computer mode or send to server for multiplayer
@@ -353,12 +403,12 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       gameOver: checkGameOver(playerDeck),
       winner: checkWinner(playerDeck, cardPlayedBy),
       turn: turnCopy,
-      playedCardsPile: updatedPlayedCardsPile,
+      playedCardsPile: updatedPlayedCardsPile, // This now reflects any reshuffling
       player1Deck: cardPlayedBy === "Player 1" ? updatedPlayerDeck : opponentDeckCopy,
       player2Deck: cardPlayedBy === "Player 2" ? updatedPlayerDeck : opponentDeckCopy,
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
-      drawCardPile: copiedDrawCardPileArray,
+      drawCardPile: copiedDrawCardPileArray, // This now reflects any reshuffling
     };
 
     if (isComputerMode) {
@@ -520,15 +570,97 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     setIsDialogOpen(false);
   };
 
+  // Function to reshuffle the discard pile when draw pile is empty
+  const reshuffleDiscardPile = () => {
+    // Make sure we have played cards to reshuffle (at least 2, since we keep the top card)
+    if (playedCardsPile.length < 2) {
+      return null; // Not enough cards to reshuffle
+    }
+    
+    // Keep the top card of the discard pile
+    const topCard = playedCardsPile[playedCardsPile.length - 1];
+    
+    // Take all other cards from the discard pile
+    const cardsToReshuffle = playedCardsPile.slice(0, playedCardsPile.length - 1);
+    
+    // Shuffle these cards
+    const newDrawPile = shuffleArray([...cardsToReshuffle]);
+    
+    // Play shuffling sound
+    playShufflingSound();
+    
+    // Show toast notification
+    toast({
+      title: "Reshuffling Cards",
+      description: "Draw pile has been replenished with shuffled cards.",
+      variant: "default",
+      duration: 3000,
+    });
+    
+    // Return an object with the new draw pile and the updated discard pile (just the top card)
+    return {
+      newDrawPile,
+      newPlayedCardsPile: [topCard]
+    };
+  };
+
   const onCardDrawnHandler = () => {
     //extract player who drew the card
     // let drawButtonPressed = true;
     // let turnCopy = turn;
     let drawButtonPressed = false; // Always set to false to disable draw button after drawing
     //remove 1 new card from drawCardPile and send it to playerDrawn method
-    const copiedDrawCardPileArray = [...drawCardPile];
+    let copiedDrawCardPileArray = [...drawCardPile];
+    let updatedPlayedCardsPile = [...playedCardsPile];
+    
+    // Check if there are cards left in the draw pile
+    if (copiedDrawCardPileArray.length === 0) {
+      // Try to reshuffle the discard pile
+      const reshuffleResult = reshuffleDiscardPile();
+      
+      if (reshuffleResult) {
+        // Update the draw and discard piles
+        copiedDrawCardPileArray = reshuffleResult.newDrawPile;
+        updatedPlayedCardsPile = reshuffleResult.newPlayedCardsPile;
+        
+        console.log('Reshuffled discard pile into draw pile. New draw pile size:', copiedDrawCardPileArray.length);
+      } else {
+        // Handle case where there aren't enough cards to reshuffle
+        console.warn('Draw card pile is empty and not enough cards to reshuffle!');
+        toast({
+          title: "No Cards Available",
+          description: "There are no more cards to draw.",
+          variant: "warning",
+          duration: 3000,
+        });
+        
+        // Skip turn without drawing
+        const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+        
+        if (isComputerMode) {
+          dispatch({
+            turn: turnCopy,
+            drawButtonPressed: false,
+          });
+        } else {
+          socket.emit("updateGameState", {
+            turn: turnCopy,
+            drawButtonPressed: false,
+          });
+        }
+        return;
+      }
+    }
+    
     //pull out last element from it
     const drawCard = copiedDrawCardPileArray.pop();
+    
+    // Safety check for undefined card
+    if (!drawCard) {
+      console.error('Undefined card drawn from pile');
+      return;
+    }
+    
     //add the drawn card to player's deck
     let numberOfDrawnCard = drawCard.charAt(0);
     let colorOfDrawnCard = drawCard.charAt(1);
@@ -565,6 +697,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
         player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
         drawCardPile: copiedDrawCardPileArray,
+        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
         drawButtonPressed,
       });
     } else {
@@ -574,6 +707,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
         player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
         drawCardPile: copiedDrawCardPileArray,
+        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
         drawButtonPressed,
       });
     }
