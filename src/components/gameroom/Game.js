@@ -396,7 +396,26 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       
       const penaltyCard2 = drawCardWithReshuffle();
       if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
+    } 
+    
+    // Create a more explicit update of player decks to prevent card transfer issues
+    let newPlayer1Deck, newPlayer2Deck;
+  
+    if (cardPlayedBy === "Player 1") {
+      newPlayer1Deck = updatedPlayerDeck; // Player 1's updated deck after playing a card
+      newPlayer2Deck = opponentDeckCopy; // Player 2's deck, possibly with added cards from Draw 2/4
+    } else { 
+      newPlayer1Deck = opponentDeckCopy; // Player 1's deck, possibly with added cards from Draw 2/4
+      newPlayer2Deck = updatedPlayerDeck; // Player 2's updated deck after playing a card
     }
+      
+    console.log('Deck changes:', {
+      cardPlayedBy,
+      originalPlayer1Deck: player1Deck.length,
+      originalPlayer2Deck: player2Deck.length,
+      newPlayer1Deck: newPlayer1Deck.length,
+      newPlayer2Deck: newPlayer2Deck.length
+        });
 
     //Update state locally for computer mode or send to server for multiplayer
     const newGameState = {
@@ -404,8 +423,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       winner: checkWinner(playerDeck, cardPlayedBy),
       turn: turnCopy,
       playedCardsPile: updatedPlayedCardsPile, // This now reflects any reshuffling
-      player1Deck: cardPlayedBy === "Player 1" ? updatedPlayerDeck : opponentDeckCopy,
-      player2Deck: cardPlayedBy === "Player 2" ? updatedPlayerDeck : opponentDeckCopy,
+      player1Deck: newPlayer1Deck,
+      player2Deck: newPlayer2Deck,
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
       drawCardPile: copiedDrawCardPileArray, // This now reflects any reshuffling
@@ -452,8 +471,16 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(4);
         const numberOfPlayedCard = 100;
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Normalize the values for comparison
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch) {
+          console.log('Valid skip card move:', { isColorMatch, isNumberMatch });
           cardPlayedByPlayer({
             cardPlayedBy,
             played_card,
@@ -464,7 +491,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
         //if no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid skip card move:', { isColorMatch, isNumberMatch });
+          alert("Invalid Move! Skip cards must match either the color or number of the current card.");
         }
         break;
       }
@@ -476,8 +504,16 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(2);
         const numberOfPlayedCard = 200;
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Normalize the values for comparison
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch) {
+          console.log('Valid draw 2 card move:', { isColorMatch, isNumberMatch });
           cardPlayedByPlayer({
             cardPlayedBy,
             played_card,
@@ -489,7 +525,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
         //if no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid draw 2 card move:', { isColorMatch, isNumberMatch });
+          alert("Invalid Move! Draw 2 cards must match either the color or number of the current card.");
         }
         break;
       }
@@ -550,13 +587,37 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         const numberOfPlayedCard = played_card.charAt(0);
         const colorOfPlayedCard = played_card.charAt(1);
 
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Debug log to check the values being compared
+        console.log('Card matching debug:', {
+          played_card,
+          numberOfPlayedCard,
+          colorOfPlayedCard,
+          currentNumber,
+          currentColor,
+          numberMatch: currentNumber === numberOfPlayedCard,
+          colorMatch: currentColor === colorOfPlayedCard,
+          numberType: typeof numberOfPlayedCard,
+          currentNumberType: typeof currentNumber
+        });
+
+        // Normalize the values for comparison (ensure they're both strings)
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        // A card can always be played if it has the same number and color as the current card
+        const isSameCard = normalizedCurrentNumber === normalizedPlayedNumber && currentColor === colorOfPlayedCard;
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch || isSameCard) {
+          console.log('Valid move:', { isColorMatch, isNumberMatch, isSameCard });
           cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard });
         }
-        //if no color or number match, invalid move - do not update state
+        // If no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid move:', { isColorMatch, isNumberMatch, isSameCard });
+          alert("Invalid Move! You must play a card that matches either the color or number of the current card.");
         }
         break;
       }
