@@ -359,7 +359,7 @@ export function hashState(state: OffChainGameState): string {
 export function hashAction(action: Action): string {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
   const encodedAction = abiCoder.encode(
-    ['string', 'bytes32', 'string'],
+    ['string', 'address', 'string'],
     [
       action.type,
       action.player,

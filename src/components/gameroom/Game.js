@@ -784,11 +784,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       // const data = await response.json();
       // console.log('API response:', data);
 
+      // Since we're not actually calling the API currently, just mark the reward as given
       if (true) {
-        console.log('Successfully created claimable balance for winner!', data);
+        console.log('Successfully created claimable balance for winner!');
         setRewardGiven(true);
 
-        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, data.balanceId);
+        // If we were calling the API, we would use the balanceId from the response
+        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, 'dummy-balance-id');
         // console.log('Supabase response:', supabaseResponse);
 
         try {
@@ -842,7 +844,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
           duration: 5000,
         });
       } else {
-        console.error('Failed to create claimable balance:', data.error);
+        console.error('Failed to create claimable balance');
 
         toast({
           title: "Reward Failed",
