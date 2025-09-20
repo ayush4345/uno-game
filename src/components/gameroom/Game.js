@@ -899,8 +899,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
 
         toast({
-          title: "Reward Created!",
-          description: "You've earned 5 DIAM tokens. Check your profile to claim them.",
+          title: "Congratulations!",
+          description: "You've won the game!",
           variant: "success",
           duration: 5000,
         });
