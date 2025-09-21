@@ -10,12 +10,10 @@ export default function Profile() {
   const [userAccount, setUserAccount] = useRecoilState(userAccountState);
   const [isLoading, setIsLoading] = useState(false);
 
-  // OnchainKit handles wallet connection through its components
   // This function is kept for compatibility with ProfilePage component
   async function connectWallet() {
     try {
       setIsLoading(true);
-      // With OnchainKit, we don't need to manually connect
       // This is just a placeholder for the ProfilePage component
       return null;
     } catch (error) {

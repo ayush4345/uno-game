@@ -2,8 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UnoGameContract } from "@/lib/types";
-import { getContractNew } from "@/lib/web3";
+import { getContract, prepareContractCall } from "thirdweb";
 import UnoGameABI from "@/constants/UnoGame.json";
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,12 +16,17 @@ import {
   useWalletClient,
   useWriteContract,
   useWaitForTransactionReceipt,
-  useReadContract,
+  // useReadContract,
 } from "wagmi";
 import BottomNavigation from "@/components/BottomNavigation";
 import GameCard from "./gameCard";
 import Link from "next/link";
 import { useChains } from 'wagmi'
+import { client } from "@/utils/thirdWebClient";
+import { baseSepolia } from "@/lib/chains";
+import { unoGameABI } from "@/constants/unogameabi";
+import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { waitForReceipt } from "thirdweb";
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
@@ -31,13 +35,11 @@ const CONNECTION =
 // DIAM wallet integration removed
 
 export default function PlayGame() {
-  const [contract, setContract] = useState<UnoGameContract | null>(null);
   const [open, setOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [computerCreateLoading, setComputerCreateLoading] = useState(false);
   const [joiningGameId, setJoiningGameId] = useState<BigInt | null>(null);
   const [gameId, setGameId] = useState<BigInt | null>(null);
-  const [games, setGames] = useState<BigInt[]>([]);
   const router = useRouter();
   const chains = useChains();
 
@@ -45,6 +47,7 @@ export default function PlayGame() {
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
+  const { mutate: sendTransaction } = useSendTransaction();
   
   // Wagmi contract write hooks
   const { writeContract, data: hash, error, isPending } = useWriteContract();
@@ -59,25 +62,17 @@ export default function PlayGame() {
   // Using Wagmi hooks for wallet connection
   const { connect, connectors } = useConnect();
 
-  // Use Wagmi to read contract data
-  const { data: activeGames, refetch: refetchGames } = useReadContract({
+  const contract = getContract({
+    client,
+    chain:  baseSepolia,
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-    abi: UnoGameABI.abi,
-    functionName: 'getNotStartedGames',
-    query: {
-      enabled: !!address, // Only fetch when wallet is connected
-      refetchInterval: 10000, // Refetch every 10 seconds
-      refetchOnWindowFocus: true, // Refetch when user returns to tab
-    }
+    abi: unoGameABI,
   });
 
-  // Update games state when activeGames changes
-  useEffect(() => {
-    if (activeGames) {
-      console.log("Active games:", activeGames);
-      setGames(activeGames as BigInt[]);
-    }
-  }, [activeGames]);
+  const { data: activeGames, refetch: refetchGames } = useReadContract({
+    contract,
+    method: "getNotStartedGames",
+  });
 
   async function handleConnectWallet() {
     try {
@@ -153,12 +148,38 @@ export default function PlayGame() {
       setCreateLoading(true);
       console.log("Creating game...");
 
-      // Use writeContract to require user signature
-      writeContract({
-        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-        abi: UnoGameABI.abi,
-        functionName: 'createGame',
-        args: [address as `0x${string}`],
+      const transaction = prepareContractCall({
+        contract: {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+          abi: unoGameABI,
+          chain: baseSepolia,
+          client,
+        },
+        method: "createGame",
+        params: [address as `0x${string}`],
+      });
+
+      sendTransaction(transaction, {
+        onSuccess: (result) => {
+          console.log("Transaction successful:", result);
+          toast({
+            title: "Game created successfully!",
+            description: "Game created successfully!",
+            duration: 5000,
+          });
+          refetchGames();
+          setCreateLoading(false);
+        },
+        onError: (error) => {
+          console.error("Transaction failed:", error);
+          toast({
+            title: "Error",
+            description: "Failed to create game. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+          setCreateLoading(false);
+        }
       });
     } catch (error) {
       console.error("Failed to create game:", error);
@@ -179,32 +200,66 @@ export default function PlayGame() {
 
         console.log("Creating computer game...");
 
-        const tx = await contract.createGame(address as `0x${string}`);
-        const receipt = await tx.wait();
-        console.log("Computer game created successfully:", receipt);
-
-        // Extract gameId from the event logs
-        const gameCreatedEvent = receipt.logs.find(
-          (log: any) => log.fragment && log.fragment.name === "GameCreated"
-        );
-
-        if (gameCreatedEvent) {
-          const gameId = gameCreatedEvent.args[0];
-          console.log("Computer Game ID:", gameId.toString());
-          setGameId(gameId);
-
-          // Emit socket event to create computer game room
-          if (socket.current) {
-            socket.current.emit("createComputerGame", {
-              gameId: gameId.toString(),
-              playerAddress: address
+        const transaction = prepareContractCall({
+          contract: {
+            address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+            abi: unoGameABI,
+            chain: baseSepolia,
+            client,
+          },
+          method: "createGame",
+          params: [address as `0x${string}`],
+        });
+  
+        sendTransaction(transaction, {
+          onSuccess: async (result) => {
+            console.log("Transaction successful:", result);
+            toast({
+              title: "Game created successfully!",
+              description: "Game created successfully!",
+              duration: 5000,
             });
-            console.log("Socket event emitted for computer game creation");
-          }
 
-          // Navigate to game room with computer mode flag
-          router.push(`/game/${gameId}?mode=computer`);
-        }
+
+            const receipt = await waitForReceipt({
+              client,
+              chain: baseSepolia,
+              transactionHash: result.transactionHash,
+            });
+
+            const gameCreatedId = receipt.logs[0].topics[1]
+
+            if (gameCreatedId) {
+              const gameId = BigInt(gameCreatedId); // Convert hex to decimal
+              setGameId(gameId);
+    
+              // Emit socket event to create computer game room
+              if (socket.current) {
+                socket.current.emit("createComputerGame", {
+                  gameId: gameId.toString(),
+                  playerAddress: address
+                });
+                console.log("Socket event emitted for computer game creation");
+              }
+    
+              // Navigate to game room with computer mode flag
+              router.push(`/game/${gameId}?mode=computer`);
+            }
+
+            refetchGames();
+            setComputerCreateLoading(false);
+          },
+          onError: (error) => {
+            console.error("Transaction failed:", error);
+            toast({
+              title: "Error",
+              description: "Failed to create game. Please try again.",
+              variant: "destructive",
+              duration: 5000,
+            });
+            setComputerCreateLoading(false);
+          }
+        });
 
         // toast({
         //   title: "Computer Game Started",
@@ -247,13 +302,38 @@ export default function PlayGame() {
       setJoiningGameId(gameId);
       console.log(`Joining game ${gameId.toString()}...`);
 
-      // Use writeContract to require user signature
-      writeContract({
-        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-        abi: UnoGameABI.abi,
-        functionName: 'joinGame',
-        args: [BigInt(gameId.toString()), address as `0x${string}`],
+      const transaction = prepareContractCall({
+        contract: {
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+          abi: unoGameABI,
+          chain: baseSepolia,
+          client,
+        },
+        method: "joinGame",
+        params: [BigInt(gameId.toString()), address as `0x${string}`],
       });
+
+      sendTransaction(transaction, {
+        onSuccess: (result) => {
+          console.log("Transaction successful:", result);
+          toast({
+            title: "Game joined successfully!",
+            description: "Game joined successfully!",
+            duration: 5000,
+          });
+          router.push(`/game/${gameId}`);
+        },
+        onError: (error) => {
+          console.error("Transaction failed:", error);
+          toast({
+            title: "Error",
+            description: "Failed to join game. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      });
+
     } catch (error) {
       console.error("Failed to join game:", error);
       setJoiningGameId(null);
@@ -265,25 +345,6 @@ export default function PlayGame() {
       });
     }
   };
-
-  const setup = async () => {
-    if (address) {
-      try {
-        const { contract } = await getContractNew();
-        setContract(contract);
-      } catch (error) {
-        console.error("Failed to setup contract:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (address) {
-      setup();
-    } else {
-      setContract(null);
-    }
-  }, [address]);
 
   // Handle transaction confirmation
   useEffect(() => {
@@ -524,11 +585,11 @@ export default function PlayGame() {
               </button> */}
             </div>
             
-            {games.length > 0 ? (
+            {activeGames && activeGames.length > 0 ? (
               <div className="bg-gray-800/30 rounded-3xl p-4">
                 <ScrollArea className="max-h-80">
                   <div className="space-y-3">
-                    {games.toReversed().map((gameId, index) => (
+                    {activeGames.toReversed().map((gameId, index) => (
                       <GameCard
                         key={index}
                         index={index}
