@@ -2,21 +2,13 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import UnoGameABI from "@/constants/UnoGame.json";
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useUserAccount } from "@/userstate/useUserAccount";
 import { WalletConnection } from "@/components/WalletConnection";
-import {
-  useAccount,
-  useConnect,
-  useWalletClient,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  // useReadContract,
-} from "wagmi";
+import { useAccount, useConnect, useWalletClient, useWriteContract, useWaitForTransactionReceipt} from "wagmi";
 import BottomNavigation from "@/components/BottomNavigation";
 import GameCard from "./gameCard";
 import Link from "next/link";
@@ -72,31 +64,6 @@ export default function PlayGame() {
     contract,
     method: "getNotStartedGames",
   });
-
-  async function handleConnectWallet() {
-    try {
-      // Find the first available connector (usually injected like MetaMask)
-      const connector = connectors.find((c) => c.ready);
-
-      if (connector) {
-        connect({ connector });
-      } else {
-        toast({
-          title: "Use Connect Wallet Button",
-          description:
-            "Please use the Connect Wallet button to connect your wallet.",
-        });
-      }
-    } catch (error) {
-      console.error(`Error: ${error}`);
-      toast({
-        title: "Connection Failed",
-        description: "Failed to connect your wallet. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    }
-  }
 
   useEffect(() => {
     if (!socket.current) {
@@ -165,6 +132,7 @@ export default function PlayGame() {
             title: "Game created successfully!",
             description: "Game created successfully!",
             duration: 5000,
+            variant: "success",
           });
           refetchGames();
           setCreateLoading(false);

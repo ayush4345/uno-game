@@ -629,11 +629,9 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       console.log(currentUser, winnerPlayer, isCurrentUserWinner)
 
       if (!isCurrentUserWinner) {
-        console.log('Current user is not the winner, not creating claimable balance');
+        console.log('Current user is not the winner');
         return;
       }
-
-      console.log(`Creating claimable balance for winner: ${winnerPlayer} with address: ${currentUserAddress}`);
 
       // const response = await fetch(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/api/create-claimable-balance`, {
       //   method: 'POST',

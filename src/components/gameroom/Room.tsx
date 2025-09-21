@@ -18,6 +18,8 @@ import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/
 import { getContract, prepareContractCall } from "thirdweb";
 import { baseSepolia } from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 type User = { 
   id: string;
@@ -43,9 +45,8 @@ const Room = () => {
   
   // Wagmi contract write hooks
   const { writeContract, data: hash, error: txError, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash,
-  });
+
+  const { toast } = useToast();
 
   const [offChainGameState, setOffChainGameState] = useState<OffChainGameState | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -289,7 +290,12 @@ const Room = () => {
         sendTransaction(transaction, {
           onSuccess: async (result) => {
             console.log("Transaction successful:", result);
-            alert('Game started successfully!');
+            toast({
+              title: "Game started successfully!",
+              description: "Game started successfully!",
+              duration: 5000,
+              variant: "success",
+            });
       
             initializeGameAfterStart();
           },
@@ -360,6 +366,7 @@ const Room = () => {
         width: "100vw",
       }}
     >
+    <Toaster />
       {isComputerMode ? (
         // Computer mode - skip waiting and go directly to game
         (() => {
@@ -400,7 +407,10 @@ const Room = () => {
       )}
     </div>
   ) : (
-    <CenterInfo msg='Room is full' />
+    <>
+      <CenterInfo msg='Room is full' />
+      <Toaster />
+    </>
   );
 };
 

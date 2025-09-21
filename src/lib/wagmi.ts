@@ -26,8 +26,8 @@ export const config = createConfig({
     ],
     ssr: true,
     transports: {
-        [arbitriumSepolia.id]: http(),
-        [base.id]: http(),
+        // [arbitriumSepolia.id]: http(),
+        // [base.id]: http(),
         [baseSepolia.id]: http(),
     },
 });
