@@ -13,6 +13,11 @@ import { applyActionToOffChainState, hashAction, startGame, storePlayerHand, get
 import { updateGlobalCardHashMap } from '../../lib/globalState';
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
 import UnoGameABI from '@/constants/UnoGame.json';
+import { unoGameABI } from "@/constants/unogameabi";
+import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { getContract, prepareContractCall } from "thirdweb";
+import { baseSepolia } from "@/lib/chains";
+import { client } from "@/utils/thirdWebClient";
 
 type User = { 
   id: string;
@@ -46,6 +51,8 @@ const Room = () => {
   const [error, setError] = useState<string | null>(null)
   const [playerToStart, setPlayerToStart] = useState<string | null>(null)
   const [playerHand, setPlayerHand] = useState<string[]>([])
+
+  const { mutate: sendTransaction } = useSendTransaction();
 
   // Initialize computer game - simplified approach
   const initializeComputerGame = () => {
@@ -261,12 +268,36 @@ const Room = () => {
       console.log('Starting game on contract...')
       
       // Use writeContract to require user signature
-      writeContract({
-        address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-        abi: UnoGameABI.abi,
-        functionName: 'startGame',
-        args: [gameId],
-      });
+      // writeContract({
+      //   address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+      //   abi: UnoGameABI.abi,
+      //   functionName: 'startGame',
+      //   args: [gameId],
+      // });
+
+      const transaction = prepareContractCall({
+          contract: {
+            address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+            abi: unoGameABI,
+            chain: baseSepolia,
+            client,
+          },
+          method: "startGame",
+          params: [gameId],
+        });
+        
+        sendTransaction(transaction, {
+          onSuccess: async (result) => {
+            console.log("Transaction successful:", result);
+            alert('Game started successfully!');
+      
+            initializeGameAfterStart();
+          },
+          onError: (error) => {
+            console.error("Transaction failed:", error);
+            setError('Failed to start game')
+          }
+        });
 
     } catch (error) {
       console.error('Failed to start game:', error)
@@ -306,12 +337,12 @@ const Room = () => {
   }
 
   // Handle transaction confirmation
-  useEffect(() => {
-    if (isConfirmed && hash) {
-      console.log('Game start transaction confirmed with hash:', hash)
-      initializeGameAfterStart()
-    }
-  }, [isConfirmed, hash])
+  // useEffect(() => {
+  //   if (isConfirmed && hash) {
+  //     console.log('Game start transaction confirmed with hash:', hash)
+  //     initializeGameAfterStart()
+  //   }
+  // }, [isConfirmed, hash])
 
   // Handle transaction error
   useEffect(() => {

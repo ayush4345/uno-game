@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getContract, prepareContractCall } from "thirdweb";
 import UnoGameABI from "@/constants/UnoGame.json";
 import io, { Socket } from "socket.io-client";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,7 +25,7 @@ import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
-import { waitForReceipt } from "thirdweb";
+import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||

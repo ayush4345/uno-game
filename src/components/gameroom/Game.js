@@ -13,6 +13,8 @@ import { useAccount, useWalletClient } from "wagmi";
 // import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
 import { getContractNew } from "../../lib/web3";
 import { ethers } from "ethers";
+import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
 
 //NUMBER CODES FOR ACTION CARDS
 //SKIP - 100
@@ -55,6 +57,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
+
+  const { mutate: sendTransaction } = useSendTransaction();
 
   const {
     gameOver,
@@ -653,12 +657,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         // console.log('Supabase response:', supabaseResponse);
 
         try {
-          const { contract } = await getContractNew();
-          
-          if (!contract) {
-            console.error('Failed to get contract instance');
-            return;
-          }
           
           const gameResultData = {
             winnerAddress: currentUserAddress,
@@ -673,18 +671,40 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
           const gameHash = ethers.keccak256(ethers.toUtf8Bytes(gameResultString));
           
           console.log('Calling endGame with gameId:', room, 'and gameHash:', gameHash);
-          
-          const tx = await contract.endGame(BigInt(room), gameHash);
-          await tx.wait();
-          
-          console.log('Game ended successfully on the blockchain!', tx);
-          
-          toast({
-            title: "Game Ended on Blockchain",
-            description: "The game has been successfully recorded on the blockchain.",
-            variant: "success",
-            duration: 5000,
+
+          const transaction = prepareContractCall({
+            contract: {
+              address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+              abi: unoGameABI,
+              chain: baseSepolia,
+              client,
+            },
+            method: "endGame",
+            params: [BigInt(room), gameHash],
           });
+          
+          sendTransaction(transaction, {
+            onSuccess: (result) => {
+              console.log("Transaction successful:", result);
+              toast({
+                title: "Game Ended on Blockchain",
+                description: "The game has been successfully recorded on the blockchain.",
+                variant: "success",
+                duration: 5000,
+              });
+            },
+            onError: (error) => {
+              console.error("Transaction failed:", error);
+              toast({
+                title: "Error",
+                description: "Failed to end game on blockchain. Please try again.",
+                variant: "destructive",
+                duration: 5000,
+              });
+            }
+          });
+          
+
         } catch (error) {
           console.error('Failed to end game on blockchain:', error);
           
