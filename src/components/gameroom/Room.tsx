@@ -56,12 +56,46 @@ const Room = () => {
   const { mutate: sendTransaction } = useSendTransaction();
 
   // Initialize computer game - simplified approach
-  const initializeComputerGame = () => {
+  const initializeComputerGame = async () => {
     console.log('Initializing computer game...');
     console.log('Current gameStarted state:', gameStarted);
-    console.log('Setting gameStarted to true...');
-    // Simply start the game - let the Game component handle the rest
-    setGameStarted(true);
+    
+    if (!contract || !account || !offChainGameState || !gameId) {
+      console.error('Missing required data to start computer game');
+      setError('Missing required data to start computer game');
+      return;
+    }
+    
+    try {
+      console.log('Starting computer game on contract...');
+      
+      // Call the blockchain contract's startGame function
+      await contract.startGame(gameId);
+      console.log('Computer game started on contract');
+      
+      // Initialize the game state
+      const newState = startGame(offChainGameState, socket);
+      console.log('New Computer Game State:', newState);
+      
+      const startingPlayer = newState.players[newState.currentPlayerIndex];
+      setPlayerToStart(startingPlayer);
+      
+      // Record the action on the blockchain
+      const action: Action = { type: 'startGame', player: bytesAddress! };
+      const actionHash = hashAction(action);
+      console.log('Computer game action hash:', actionHash);
+      
+      // Commit the move to the contract
+      await contract.commitMove(gameId, actionHash);
+      console.log('Computer game move committed to contract');
+      
+      // Set game as started
+      setGameStarted(true);
+      setOffChainGameState(newState);
+    } catch (error) {
+      console.error('Error starting computer game on blockchain:', error);
+      setError('Failed to start computer game on blockchain. Please try again.');
+    }
   };
 
   useEffect(() => {
@@ -73,9 +107,8 @@ const Room = () => {
       ]);
       setCurrentUser("Player 1");
       
-      // Start the game immediately for computer mode
-      console.log('Computer mode detected, starting game immediately');
-      setGameStarted(true);
+      // We'll initialize the computer game after contract setup
+      console.log('Computer mode detected, will initialize after contract setup');
     } else {
       socket.emit("join", { room: room }, (error: any) => {
         if (error) setRoomFull(true);
@@ -98,12 +131,19 @@ const Room = () => {
         if (contract && id) {
           const bigIntId = BigInt(id as string)
           setGameId(bigIntId)
-          await fetchGameState(contract, bigIntId, account)
+          const gameState = await fetchGameState(contract, bigIntId, account)
+          
+          // If in computer mode and we have all the necessary data, initialize the computer game
+          if (isComputerMode && contract && gameState && !gameStarted) {
+            console.log('Contract and game state loaded, initializing computer game...')
+            // Small delay to ensure state is updated
+            setTimeout(() => initializeComputerGame(), 500)
+          }
         }
       }
     }
     setup()
-  }, [id, account])
+  }, [id, account, isComputerMode, gameStarted])
 
   useEffect(() => {
     if (!socket || !id) return;

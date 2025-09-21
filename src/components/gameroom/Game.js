@@ -107,7 +107,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       // Otherwise play a regular card
       return validMoves[0];
     } else {
-      // Draw a card if no valid moves
+      // Check if draw pile is empty and needs reshuffling
+      if (drawCardPile.length === 0 && playedCardsPile.length > 1) {
+        // Don't need to actually reshuffle here, as that will happen in onCardDrawnHandler
+        console.log('Computer notices draw pile is empty, will trigger reshuffle on draw');
+      }
+      
+      // Draw a card if no valid moves - with new rule, computer will always draw one card and end turn
       return "draw";
     }
   };
@@ -125,7 +131,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         const computerMove = computerMakeMove();
         
         if (computerMove === "draw") {
-          // Computer draws a card
+          // Computer draws a card and automatically ends turn (as per new rule)
           onCardDrawnHandler();
         } else {
           // Computer plays a card
@@ -319,20 +325,61 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
     //remove the played card from player's deck and add it to playedCardsPile and update their deck(immutably)
     const removeIndex = playerDeck.indexOf(played_card);
-    const updatedPlayedCardsPile = [...playedCardsPile, played_card];
     let updatedPlayerDeck = [...playerDeck.slice(0, removeIndex), ...playerDeck.slice(removeIndex + 1)];
 
     //make a drawcardpile copy for managing draw2,draw4 and UNO penalty
-    const copiedDrawCardPileArray = [...drawCardPile];
+    let copiedDrawCardPileArray = [...drawCardPile];
+    let updatedPlayedCardsPile = [...playedCardsPile, played_card];
     let opponentDeckCopy = [...opponentDeck];
+    
+    // Helper function to draw a card with reshuffle if needed
+    const drawCardWithReshuffle = () => {
+      // Check if draw pile is empty and needs reshuffling
+      if (copiedDrawCardPileArray.length === 0) {
+        // Keep the top card (the one just played)
+        const topCard = updatedPlayedCardsPile[updatedPlayedCardsPile.length - 1];
+        
+        // Take all other cards from the discard pile
+        const cardsToReshuffle = updatedPlayedCardsPile.slice(0, updatedPlayedCardsPile.length - 1);
+        
+        // If we have cards to reshuffle
+        if (cardsToReshuffle.length > 0) {
+          // Shuffle these cards
+          copiedDrawCardPileArray = shuffleArray([...cardsToReshuffle]);
+          updatedPlayedCardsPile = [topCard];
+          
+          // Play shuffling sound
+          playShufflingSound();
+          
+          console.log('Reshuffled discard pile into draw pile during penalty. New draw pile size:', copiedDrawCardPileArray.length);
+        }
+      }
+      
+      // Draw a card if possible
+      if (copiedDrawCardPileArray.length > 0) {
+        return copiedDrawCardPileArray.pop();
+      }
+      
+      return null; // No card available
+    };
+    
     // if it is a draw2 or draw4 move pop cards from drawCardPile
     // and add them to opponent's deck (immutably)
     if (isDraw2 || isDraw4) {
-      opponentDeckCopy.push(copiedDrawCardPileArray.pop());
-      opponentDeckCopy.push(copiedDrawCardPileArray.pop());
+      // Draw 2 cards for Draw 2
+      const card1 = drawCardWithReshuffle();
+      if (card1) opponentDeckCopy.push(card1);
+      
+      const card2 = drawCardWithReshuffle();
+      if (card2) opponentDeckCopy.push(card2);
+      
+      // Draw 2 more cards for Draw 4
       if (isDraw4) {
-        opponentDeckCopy.push(copiedDrawCardPileArray.pop());
-        opponentDeckCopy.push(copiedDrawCardPileArray.pop());
+        const card3 = drawCardWithReshuffle();
+        if (card3) opponentDeckCopy.push(card3);
+        
+        const card4 = drawCardWithReshuffle();
+        if (card4) opponentDeckCopy.push(card4);
       }
     }
 
@@ -347,22 +394,44 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     //if not then add 2 cards as penalty else continue
     if (playerDeck.length === 2 && !isUnoButtonPressed) {
       alert("Oops! You forgot to press UNO. You drew 2 cards as penalty.");
-      //pull out last two cards from dracard pile and add them to player1's deck
-      updatedPlayerDeck.push(copiedDrawCardPileArray.pop());
-      updatedPlayerDeck.push(copiedDrawCardPileArray.pop());
+      //pull out last two cards from draw card pile and add them to player's deck
+      const penaltyCard1 = drawCardWithReshuffle();
+      if (penaltyCard1) updatedPlayerDeck.push(penaltyCard1);
+      
+      const penaltyCard2 = drawCardWithReshuffle();
+      if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
+    } 
+    
+    // Create a more explicit update of player decks to prevent card transfer issues
+    let newPlayer1Deck, newPlayer2Deck;
+  
+    if (cardPlayedBy === "Player 1") {
+      newPlayer1Deck = updatedPlayerDeck; // Player 1's updated deck after playing a card
+      newPlayer2Deck = opponentDeckCopy; // Player 2's deck, possibly with added cards from Draw 2/4
+    } else { 
+      newPlayer1Deck = opponentDeckCopy; // Player 1's deck, possibly with added cards from Draw 2/4
+      newPlayer2Deck = updatedPlayerDeck; // Player 2's updated deck after playing a card
     }
+      
+    console.log('Deck changes:', {
+      cardPlayedBy,
+      originalPlayer1Deck: player1Deck.length,
+      originalPlayer2Deck: player2Deck.length,
+      newPlayer1Deck: newPlayer1Deck.length,
+      newPlayer2Deck: newPlayer2Deck.length
+        });
 
     //Update state locally for computer mode or send to server for multiplayer
     const newGameState = {
       gameOver: checkGameOver(playerDeck),
       winner: checkWinner(playerDeck, cardPlayedBy),
       turn: turnCopy,
-      playedCardsPile: updatedPlayedCardsPile,
-      player1Deck: cardPlayedBy === "Player 1" ? updatedPlayerDeck : opponentDeckCopy,
-      player2Deck: cardPlayedBy === "Player 2" ? updatedPlayerDeck : opponentDeckCopy,
+      playedCardsPile: updatedPlayedCardsPile, // This now reflects any reshuffling
+      player1Deck: newPlayer1Deck,
+      player2Deck: newPlayer2Deck,
       currentColor: colorOfPlayedCard,
       currentNumber: numberOfPlayedCard,
-      drawCardPile: copiedDrawCardPileArray,
+      drawCardPile: copiedDrawCardPileArray, // This now reflects any reshuffling
     };
 
     if (isComputerMode) {
@@ -406,8 +475,16 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(4);
         const numberOfPlayedCard = 100;
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Normalize the values for comparison
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch) {
+          console.log('Valid skip card move:', { isColorMatch, isNumberMatch });
           cardPlayedByPlayer({
             cardPlayedBy,
             played_card,
@@ -418,7 +495,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
         //if no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid skip card move:', { isColorMatch, isNumberMatch });
+          alert("Invalid Move! Skip cards must match either the color or number of the current card.");
         }
         break;
       }
@@ -430,8 +508,16 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         //extract color of played skip card
         const colorOfPlayedCard = played_card.charAt(2);
         const numberOfPlayedCard = 200;
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Normalize the values for comparison
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch) {
+          console.log('Valid draw 2 card move:', { isColorMatch, isNumberMatch });
           cardPlayedByPlayer({
             cardPlayedBy,
             played_card,
@@ -443,7 +529,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
         //if no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid draw 2 card move:', { isColorMatch, isNumberMatch });
+          alert("Invalid Move! Draw 2 cards must match either the color or number of the current card.");
         }
         break;
       }
@@ -504,13 +591,37 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         const numberOfPlayedCard = played_card.charAt(0);
         const colorOfPlayedCard = played_card.charAt(1);
 
-        //check for color match or number match
-        if (currentColor === colorOfPlayedCard || currentNumber === numberOfPlayedCard) {
+        // Debug log to check the values being compared
+        console.log('Card matching debug:', {
+          played_card,
+          numberOfPlayedCard,
+          colorOfPlayedCard,
+          currentNumber,
+          currentColor,
+          numberMatch: currentNumber === numberOfPlayedCard,
+          colorMatch: currentColor === colorOfPlayedCard,
+          numberType: typeof numberOfPlayedCard,
+          currentNumberType: typeof currentNumber
+        });
+
+        // Normalize the values for comparison (ensure they're both strings)
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        // A card can always be played if it has the same number and color as the current card
+        const isSameCard = normalizedCurrentNumber === normalizedPlayedNumber && currentColor === colorOfPlayedCard;
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch || isSameCard) {
+          console.log('Valid move:', { isColorMatch, isNumberMatch, isSameCard });
           cardPlayedByPlayer({ cardPlayedBy, played_card, colorOfPlayedCard, numberOfPlayedCard });
         }
-        //if no color or number match, invalid move - do not update state
+        // If no color or number match, invalid move - do not update state
         else {
-          alert("Invalid Move!");
+          console.log('Invalid move:', { isColorMatch, isNumberMatch, isSameCard });
+          alert("Invalid Move! You must play a card that matches either the color or number of the current card.");
         }
         break;
       }
@@ -524,14 +635,97 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     setIsDialogOpen(false);
   };
 
+  // Function to reshuffle the discard pile when draw pile is empty
+  const reshuffleDiscardPile = () => {
+    // Make sure we have played cards to reshuffle (at least 2, since we keep the top card)
+    if (playedCardsPile.length < 2) {
+      return null; // Not enough cards to reshuffle
+    }
+    
+    // Keep the top card of the discard pile
+    const topCard = playedCardsPile[playedCardsPile.length - 1];
+    
+    // Take all other cards from the discard pile
+    const cardsToReshuffle = playedCardsPile.slice(0, playedCardsPile.length - 1);
+    
+    // Shuffle these cards
+    const newDrawPile = shuffleArray([...cardsToReshuffle]);
+    
+    // Play shuffling sound
+    playShufflingSound();
+    
+    // Show toast notification
+    toast({
+      title: "Reshuffling Cards",
+      description: "Draw pile has been replenished with shuffled cards.",
+      variant: "default",
+      duration: 3000,
+    });
+    
+    // Return an object with the new draw pile and the updated discard pile (just the top card)
+    return {
+      newDrawPile,
+      newPlayedCardsPile: [topCard]
+    };
+  };
+
   const onCardDrawnHandler = () => {
     //extract player who drew the card
-    let drawButtonPressed = true;
-    let turnCopy = turn;
+    // let drawButtonPressed = true;
+    // let turnCopy = turn;
+    let drawButtonPressed = false; // Always set to false to disable draw button after drawing
     //remove 1 new card from drawCardPile and send it to playerDrawn method
-    const copiedDrawCardPileArray = [...drawCardPile];
+    let copiedDrawCardPileArray = [...drawCardPile];
+    let updatedPlayedCardsPile = [...playedCardsPile];
+    
+    // Check if there are cards left in the draw pile
+    if (copiedDrawCardPileArray.length === 0) {
+      // Try to reshuffle the discard pile
+      const reshuffleResult = reshuffleDiscardPile();
+      
+      if (reshuffleResult) {
+        // Update the draw and discard piles
+        copiedDrawCardPileArray = reshuffleResult.newDrawPile;
+        updatedPlayedCardsPile = reshuffleResult.newPlayedCardsPile;
+        
+        console.log('Reshuffled discard pile into draw pile. New draw pile size:', copiedDrawCardPileArray.length);
+      } else {
+        // Handle case where there aren't enough cards to reshuffle
+        console.warn('Draw card pile is empty and not enough cards to reshuffle!');
+        toast({
+          title: "No Cards Available",
+          description: "There are no more cards to draw.",
+          variant: "warning",
+          duration: 3000,
+        });
+        
+        // Skip turn without drawing
+        const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+        
+        if (isComputerMode) {
+          dispatch({
+            turn: turnCopy,
+            drawButtonPressed: false,
+          });
+        } else {
+          socket.emit("updateGameState", {
+            turn: turnCopy,
+            drawButtonPressed: false,
+          });
+        }
+        return;
+      }
+    }
+    
     //pull out last element from it
     const drawCard = copiedDrawCardPileArray.pop();
+    
+    // Safety check for undefined card
+    if (!drawCard) {
+      console.error('Undefined card drawn from pile');
+      return;
+    }
+    
     //add the drawn card to player's deck
     let numberOfDrawnCard = drawCard.charAt(0);
     let colorOfDrawnCard = drawCard.charAt(1);
@@ -547,15 +741,19 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       numberOfDrawnCard = 200;
     }
 
-    if (
-      drawCard !== "W" &&
-      drawCard !== "D4W" &&
-      currentNumber !== numberOfDrawnCard &&
-      currentColor !== colorOfDrawnCard
-    ) {
-      turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
-      drawButtonPressed = false;
-    }
+    // if (
+    //   drawCard !== "W" &&
+    //   drawCard !== "D4W" &&
+    //   currentNumber !== numberOfDrawnCard &&
+    //   currentColor !== colorOfDrawnCard
+    // ) {
+    //   turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+    //   drawButtonPressed = false;
+    // }
+    
+    // Modified rule: Always pass turn after drawing a card
+    // regardless of whether the drawn card is playable or not
+    const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
 
     if (isComputerMode) {
       // Handle locally for computer mode
@@ -564,6 +762,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
         player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
         drawCardPile: copiedDrawCardPileArray,
+        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
         drawButtonPressed,
       });
     } else {
@@ -573,6 +772,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         player1Deck: turn === "Player 1" ? [...player1Deck, drawCard] : player1Deck,
         player2Deck: turn === "Player 2" ? [...player2Deck, drawCard] : player2Deck,
         drawCardPile: copiedDrawCardPileArray,
+        playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
         drawButtonPressed,
       });
     }
@@ -647,11 +847,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       // const data = await response.json();
       // console.log('API response:', data);
 
+      // Since we're not actually calling the API currently, just mark the reward as given
       if (true) {
-        console.log('Successfully created claimable balance for winner!', data);
+        console.log('Successfully created claimable balance for winner!');
         setRewardGiven(true);
 
-        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, data.balanceId);
+        // If we were calling the API, we would use the balanceId from the response
+        // const supabaseResponse = await claimableBalancesApi.addClaimableBalance(currentUserAddress, 'dummy-balance-id');
         // console.log('Supabase response:', supabaseResponse);
 
         try {
@@ -715,13 +917,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         }
 
         toast({
-          title: "Reward Created!",
-          description: "You've earned 5 DIAM tokens. Check your profile to claim them.",
+          title: "Congratulations!",
+          description: "You've won the game!",
           variant: "success",
           duration: 5000,
         });
       } else {
-        console.error('Failed to create claimable balance:', data.error);
+        console.error('Failed to create claimable balance');
 
         toast({
           title: "Reward Failed",
