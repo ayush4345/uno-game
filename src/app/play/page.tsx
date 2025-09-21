@@ -39,12 +39,6 @@ export default function PlayGame() {
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
   const { mutate: sendTransaction } = useSendTransaction();
-  
-  // Wagmi contract write hooks
-  const { writeContract, data: hash, error, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash,
-  });
 
   const socket = useRef<Socket | null>(null);
 
@@ -161,10 +155,10 @@ export default function PlayGame() {
   };
 
   const startComputerGame = async () => {
+    setComputerCreateLoading(true);
     if (contract && address) {
       try {
-        setComputerCreateLoading(true);
-
+        
         console.log("Creating computer game...");
 
         const transaction = prepareContractCall({
@@ -241,7 +235,6 @@ export default function PlayGame() {
           variant: "destructive",
           duration: 5000,
         });
-      } finally {
         setComputerCreateLoading(false);
       }
     } else {
@@ -251,6 +244,7 @@ export default function PlayGame() {
         variant: "destructive",
         duration: 5000,
       });
+      setComputerCreateLoading(false);
     }
   };
 
@@ -314,62 +308,62 @@ export default function PlayGame() {
   };
 
   // Handle transaction confirmation
-  useEffect(() => {
-    if (isConfirmed && hash) {
-      console.log("Transaction confirmed with hash:", hash);
+  // useEffect(() => {
+  //   if (isConfirmed && hash) {
+  //     console.log("Transaction confirmed with hash:", hash);
       
-      // Check if this was a create game transaction
-      if (createLoading) {
-        console.log("Game created successfully");
+  //     // Check if this was a create game transaction
+  //     if (createLoading) {
+  //       console.log("Game created successfully");
         
-        if (socket && socket.current) {
-          socket.current.emit("createGameRoom");
-        }
+  //       if (socket && socket.current) {
+  //         socket.current.emit("createGameRoom");
+  //       }
         
-        refetchGames();
-        setCreateLoading(false);
+  //       refetchGames();
+  //       setCreateLoading(false);
         
-        toast({
-          title: "Success",
-          description: "Game created successfully!",
-          duration: 3000,
-        });
-      }
+  //       toast({
+  //         title: "Success",
+  //         description: "Game created successfully!",
+  //         duration: 3000,
+  //       });
+  //     }
       
-      // Check if this was a join game transaction
-      if (joiningGameId !== null) {
-        console.log(`Joined game ${joiningGameId.toString()} successfully`);
+  //     // Check if this was a join game transaction
+  //     if (joiningGameId !== null) {
+  //       console.log(`Joined game ${joiningGameId.toString()} successfully`);
         
-        const gameIdToJoin = joiningGameId;
-        setJoiningGameId(null);
+  //       const gameIdToJoin = joiningGameId;
+  //       setJoiningGameId(null);
         
-        toast({
-          title: "Success", 
-          description: "Joined game successfully!",
-          duration: 3000,
-        });
+  //       toast({
+  //         title: "Success", 
+  //         description: "Joined game successfully!",
+  //         duration: 3000,
+  //       });
         
-        // Navigate to the game room
-        router.push(`/game/${gameIdToJoin.toString()}`);
-      }
-    }
-  }, [isConfirmed, hash, createLoading, joiningGameId]);
+  //       // Navigate to the game room
+  //       router.push(`/game/${gameIdToJoin.toString()}`);
+  //     }
+  //   }
+  // }, [createLoading, joiningGameId]);
 
   // Handle transaction error
-  useEffect(() => {
-    if (error) {
-      console.error("Transaction error:", error);
-      setCreateLoading(false);
-      setJoiningGameId(null);
+  // useEffect(() => {
+  //   if (error) {
+  //     console.error("Transaction error:", error);
+  //     setCreateLoading(false);
+  //     setJoiningGameId(null);
       
-      toast({
-        title: "Transaction Failed",
-        description: error.message || "Transaction failed. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    }
-  }, [error]);
+  //     toast({
+  //       title: "Transaction Failed",
+  //       description: error.message || "Transaction failed. Please try again.",
+  //       variant: "destructive",
+  //       duration: 5000,
+  //     });
+  //   }
+  // }, [error]);
 
   return (
     <div
