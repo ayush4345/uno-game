@@ -179,6 +179,7 @@ export default function PlayGame() {
               title: "Game created successfully!",
               description: "Game created successfully!",
               duration: 5000,
+              variant: "success",
             });
 
 
