@@ -4,7 +4,6 @@ import { Providers } from './provider'
 import { Analytics } from "@vercel/analytics/react"
 import '@coinbase/onchainkit/styles.css';
 import './globals.css';
-import { CampModal } from "@campnetwork/origin/react";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -60,7 +59,6 @@ export default function RootLayout({
         <Analytics />
         <Providers>
           {children}
-          {/* <CampModal /> */}
         </Providers>
       </body>
     </html>

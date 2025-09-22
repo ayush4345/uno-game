@@ -17,7 +17,7 @@ export const arbitriumSepolia = {
 } as const satisfies Chain;
 
 export const config = createConfig({
-    chains: [arbitriumSepolia, base, baseSepolia],
+    chains: [baseSepolia],
     connectors: [
         coinbaseWallet({
             appName: 'Zunno',
@@ -26,8 +26,8 @@ export const config = createConfig({
     ],
     ssr: true,
     transports: {
-        [arbitriumSepolia.id]: http(),
-        [base.id]: http(),
+        // [arbitriumSepolia.id]: http(),
+        // [base.id]: http(),
         [baseSepolia.id]: http(),
     },
 });

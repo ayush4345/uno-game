@@ -30,7 +30,7 @@ export function useWagmiConfig() {
         },
       ],
       {
-        appName: 'onchainkit',
+        appName: 'zunno',
         projectId,
       },
     );
@@ -39,7 +39,6 @@ export function useWagmiConfig() {
       chains: [base, baseSepolia],
       // turn off injected provider discovery
       multiInjectedProviderDiscovery: false,
-      connectors,
       ssr: true,
       transports: {
         [base.id]: http(),

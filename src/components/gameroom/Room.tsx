@@ -11,6 +11,15 @@ import { useUserAccount } from '@/userstate/useUserAccount';
 import { getContractNew } from '../../lib/web3'
 import { applyActionToOffChainState, hashAction, startGame, storePlayerHand, getPlayerHand, createDeck, hashCard, initializeOffChainState } from '../../lib/gameLogic'
 import { updateGlobalCardHashMap } from '../../lib/globalState';
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
+import UnoGameABI from '@/constants/UnoGame.json';
+import { unoGameABI } from "@/constants/unogameabi";
+import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { getContract, prepareContractCall } from "thirdweb";
+import { baseSepolia } from "@/lib/chains";
+import { client } from "@/utils/thirdWebClient";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 type User = { 
   id: string;
@@ -30,54 +39,92 @@ const Room = () => {
   const [currentUser, setCurrentUser] = useState<User["name"]>("");
   const [gameStarted, setGameStarted] = useState(false);
   const { account, bytesAddress } = useUserAccount();
+  const { address } = useAccount();
   const [contract, setContract] = useState<UnoGameContract | null>(null)
   const [gameId, setGameId] = useState<bigint | null>(null)
+  
+  // Wagmi contract write hooks
+  const { writeContract, data: hash, error: txError, isPending } = useWriteContract();
+
+  const { toast } = useToast();
 
   const [offChainGameState, setOffChainGameState] = useState<OffChainGameState | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [playerToStart, setPlayerToStart] = useState<string | null>(null)
   const [playerHand, setPlayerHand] = useState<string[]>([])
 
-  // Initialize computer game with blockchain integration
+  const { mutate: sendTransaction } = useSendTransaction();
+
+  // Initialize computer game - simplified approach
   const initializeComputerGame = async () => {
     console.log('Initializing computer game...');
     console.log('Current gameStarted state:', gameStarted);
+    console.log('Current contract:', contract);
+    console.log('Current account:', account);
+    console.log('Current offChainGameState:', offChainGameState);
+    console.log('Current gameId:', gameId);
     
-    if (!contract || !account || !offChainGameState || !gameId) {
-      console.error('Missing required data to start computer game');
-      setError('Missing required data to start computer game');
+    // Verify all required data is available
+    if (!contract) {
+      console.error('Missing contract to start computer game');
+      setError('Missing contract to start computer game');
+      return;
+    }
+    
+    if (!account) {
+      console.error('Missing account to start computer game');
+      setError('Missing account to start computer game');
+      return;
+    }
+    
+    if (!offChainGameState) {
+      console.error('Missing game state to start computer game');
+      setError('Missing game state to start computer game');
+      return;
+    }
+    
+    if (!gameId) {
+      console.error('Missing game ID to start computer game');
+      setError('Missing game ID to start computer game');
       return;
     }
     
     try {
-      console.log('Starting computer game on contract...');
+      console.log('Initializing computer game directly without blockchain transaction...');
       
-      // Call the blockchain contract's startGame function
-      await contract.startGame(gameId);
-      console.log('Computer game started on contract');
+      // Skip the blockchain startGame transaction for computer mode
+      // Just initialize the game state directly
+      console.log('Computer game initialized - skipping blockchain transaction');
       
-      // Initialize the game state
+      toast({
+        title: "Computer game initialized",
+        description: "Starting game against computer opponent",
+        duration: 5000,
+        variant: "success",
+      });
+      
+      // Initialize the game state after the transaction is confirmed
       const newState = startGame(offChainGameState, socket);
       console.log('New Computer Game State:', newState);
       
       const startingPlayer = newState.players[newState.currentPlayerIndex];
       setPlayerToStart(startingPlayer);
       
-      // Record the action on the blockchain
+      // Create the action but don't commit it to the blockchain for computer mode
       const action: Action = { type: 'startGame', player: bytesAddress! };
       const actionHash = hashAction(action);
-      console.log('Computer game action hash:', actionHash);
+      console.log('Computer game action hash (not committed to blockchain):', actionHash);
       
-      // Commit the move to the contract
-      await contract.commitMove(gameId, actionHash);
-      console.log('Computer game move committed to contract');
-      
-      // Set game as started
+      // Skip the blockchain commitMove transaction for computer mode
+      console.log('Skipping blockchain commitMove transaction for computer mode');
+
+      // Set the game as started and update the state
       setGameStarted(true);
       setOffChainGameState(newState);
+      
     } catch (error) {
-      console.error('Error starting computer game on blockchain:', error);
-      setError('Failed to start computer game on blockchain. Please try again.');
+      console.error('Error initializing computer game:', error);
+      setError('Failed to initialize computer game. Please try again.');
     }
   };
 
@@ -109,24 +156,72 @@ const Room = () => {
   useEffect(() => {
     const setup = async () => {
       if (account) {
-        const { contract } = await getContractNew()
-        setContract(contract)
-        if (contract && id) {
-          const bigIntId = BigInt(id as string)
-          setGameId(bigIntId)
-          const gameState = await fetchGameState(contract, bigIntId, account)
+        try {
+          console.log('Setting up contract with account:', account);
+          const contractResult = await getContractNew();
+          console.log('Contract result:', contractResult);
           
-          // If in computer mode and we have all the necessary data, initialize the computer game
-          if (isComputerMode && contract && gameState && !gameStarted) {
-            console.log('Contract and game state loaded, initializing computer game...')
-            // Small delay to ensure state is updated
-            setTimeout(() => initializeComputerGame(), 500)
+          if (!contractResult.contract) {
+            console.error('Failed to initialize contract');
+            setError('Failed to initialize contract. Please try again.');
+            return;
           }
+          
+          console.log('Contract initialized:', contractResult.contract);
+          setContract(contractResult.contract);
+          
+          if (contractResult.contract && id) {
+            const bigIntId = BigInt(id as string);
+            console.log('Setting game ID:', bigIntId.toString());
+            setGameId(bigIntId);
+            
+            console.log('Fetching game state...');
+            const gameState = await fetchGameState(contractResult.contract, bigIntId, account);
+            // Set the offChainGameState from the game state
+            if (gameState) {
+              console.log('Game state fetched successfully');
+              setOffChainGameState(gameState);
+              // Note: For computer mode, we'll initialize the game in a separate useEffect
+              // after all state is properly set, without blockchain transactions
+              // For non-computer mode, we'll wait for the gameStarted event from the server
+            } else {
+              console.error('Failed to fetch game state');
+              setError('Failed to fetch game state. Please try again.');
+            }
+          }
+        } catch (error) {
+          console.error('Error in setup:', error);
+          setError('Failed to set up the game. Please try again.');
         }
       }
+    };
+    setup();
+  }, [id, account])
+  
+  // Separate useEffect to initialize computer game when all dependencies are available
+  // For computer mode, we initialize the game without blockchain transactions
+  useEffect(() => {
+    console.log('Computer game initialization check:', {
+      isComputerMode,
+      hasContract: !!contract,
+      hasOffChainGameState: !!offChainGameState,
+      hasGameId: !!gameId,
+      gameStarted
+    });
+    
+    if (isComputerMode && contract && offChainGameState && gameId && !gameStarted) {
+      console.log('All required data available, initializing computer game (without blockchain transactions)...');
+      console.log('Contract details available (but not used for transactions):', contract);
+      console.log('Game ID:', gameId.toString());
+      console.log('Off-chain state:', offChainGameState);
+      
+      // Small delay to ensure state is fully updated
+      setTimeout(() => {
+        console.log('Executing initializeComputerGame after delay');
+        initializeComputerGame();
+      }, 2000);
     }
-    setup()
-  }, [id, account, isComputerMode, gameStarted])
+  }, [isComputerMode, contract, offChainGameState, gameId, gameStarted, initializeComputerGame])
 
   useEffect(() => {
     if (!socket || !id) return;
@@ -220,10 +315,26 @@ const Room = () => {
 
   const fetchGameState = async (contract: UnoGameContract, gameId: bigint, account: string) => {
     try {
-      const [id, players, status, startTime, endTime, gameHash, moves] = await contract.getGame(gameId)
+      console.log('Fetching game state for game ID:', gameId.toString());
+      console.log('Using contract:', contract);
+      
+      if (!contract || !contract.getGame) {
+        throw new Error('Invalid contract or missing getGame method');
+      }
+      
+      // Call the getGame method on the ethers.js contract
+      const gameData = await contract.getGame(gameId);
+      console.log('Raw game data:', gameData);
+      
+      if (!gameData) {
+        throw new Error('No game data returned from contract');
+      }
+      
+      // Extract the data from the result
+      const [id, players, status, startTime, endTime, gameHash, moves] = gameData;
       console.log('On chain game state: ', { id, players, status, startTime, endTime, gameHash, moves })
 
-      const gameData = {
+      const formattedGameData = {
         id,
         players,
         status,
@@ -233,14 +344,14 @@ const Room = () => {
         moves
       };
 
-      console.log('Formatted game data:', gameData);
+      console.log('Formatted game data:', formattedGameData);
 
       let offChainGameState: OffChainGameState = {
-        id: gameData.id,
-        players: Array.from(gameData.players), // Convert from Result object to array
+        id: id, // Use the destructured variables directly
+        players: Array.from(players), // Convert from Result object to array
         isActive: true, // Assume active if we can fetch it
         currentPlayerIndex: 0, // Will be set properly when game starts
-        lastActionTimestamp: gameData.startTime,
+        lastActionTimestamp: startTime,
         turnCount: BigInt(0), // Initialize to 0
         directionClockwise: true, // Default direction
         playerHandsHash: {},
@@ -250,8 +361,8 @@ const Room = () => {
         currentColor: null,
         currentValue: null,
         lastPlayedCardHash: null,
-        stateHash: gameData.gameHash || '',
-        isStarted: gameData.status === 1 // 0=NotStarted, 1=Started, 2=Ended
+        stateHash: gameHash || '',
+        isStarted: status === 1 // 0=NotStarted, 1=Started, 2=Ended
       }
 
       if (offChainGameState.isStarted) {
@@ -269,9 +380,11 @@ const Room = () => {
         setPlayerHand(playerHand);
       }
 
+      // Update the state with the new game state
       setOffChainGameState(offChainGameState)
       console.log('Off chain game state: ', offChainGameState)
 
+      // Return the game state for further processing
       return offChainGameState;
     } catch (error) {
       console.error('Error fetching game state:', error)
@@ -281,8 +394,8 @@ const Room = () => {
   }
 
   const handleStartGame = async () => {
-    console.log('Starting game with:', { contract, account, offChainGameState, gameId })
-    if (!contract || !account || !offChainGameState || !gameId) {
+    console.log('Starting game with:', { address, account, offChainGameState, gameId })
+    if (!address || !account || !offChainGameState || !gameId) {
       console.error('Missing required data to start game')
       setError('Missing required data to start game')
       return
@@ -291,10 +404,54 @@ const Room = () => {
     try {
       console.log('Starting game on contract...')
       
-      await contract.startGame(gameId)
+      // Use writeContract to require user signature
+      // writeContract({
+      //   address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+      //   abi: UnoGameABI.abi,
+      //   functionName: 'startGame',
+      //   args: [gameId],
+      // });
 
-      console.log('Game started on contract')
+      const transaction = prepareContractCall({
+          contract: {
+            address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
+            abi: unoGameABI,
+            chain: baseSepolia,
+            client,
+          },
+          method: "startGame",
+          params: [gameId],
+        });
+        
+        sendTransaction(transaction, {
+          onSuccess: async (result) => {
+            console.log("Transaction successful:", result);
+            toast({
+              title: "Game started successfully!",
+              description: "Game started successfully!",
+              duration: 5000,
+              variant: "success",
+            });
+      
+            initializeGameAfterStart();
+          },
+          onError: (error) => {
+            console.error("Transaction failed:", error);
+            setError('Failed to start game')
+          }
+        });
 
+    } catch (error) {
+      console.error('Failed to start game:', error)
+      setError('Failed to start game')
+    }
+  }
+
+  // Handle successful game start after transaction confirmation
+  const initializeGameAfterStart = () => {
+    if (!offChainGameState || !bytesAddress) return
+
+    try {
       console.log('Initializing local game state...')
       const newState = startGame(offChainGameState, socket)
       console.log('New State:', newState)
@@ -321,6 +478,22 @@ const Room = () => {
     }
   }
 
+  // Handle transaction confirmation
+  // useEffect(() => {
+  //   if (isConfirmed && hash) {
+  //     console.log('Game start transaction confirmed with hash:', hash)
+  //     initializeGameAfterStart()
+  //   }
+  // }, [isConfirmed, hash])
+
+  // Handle transaction error
+  useEffect(() => {
+    if (txError) {
+      console.error('Game start transaction error:', txError)
+      setError('Failed to start game transaction. Please try again.')
+    }
+  }, [txError])
+
   return !roomFull ? (
     <div
       className={`Game backgroundColorB`}
@@ -329,6 +502,7 @@ const Room = () => {
         width: "100vw",
       }}
     >
+    <Toaster />
       {isComputerMode ? (
         // Computer mode - skip waiting and go directly to game
         (() => {
@@ -369,7 +543,10 @@ const Room = () => {
       )}
     </div>
   ) : (
-    <CenterInfo msg='Room is full' />
+    <>
+      <CenterInfo msg='Room is full' />
+      <Toaster />
+    </>
   );
 };
 
