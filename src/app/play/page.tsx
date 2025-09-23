@@ -190,7 +190,7 @@ export default function PlayGame() {
               transactionHash: result.transactionHash,
             });
 
-            const gameCreatedId = receipt.logs[0].topics[1]
+            const gameCreatedId = receipt.logs.find((log) => log.topics.length == 2 && log.topics[1])?.topics[1]
 
             if (gameCreatedId) {
               const gameId = BigInt(gameCreatedId); // Convert hex to decimal
