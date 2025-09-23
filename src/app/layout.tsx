@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'] })
 // Define miniapp configuration
 const miniappConfig = {
   version: "1",
-  imageUrl: "https://uno-game-pi.vercel.app/images/hero-1.png",
+  imageUrl: "https://zunno.xyz/images/hero-1.png",
   button: {
     title: "Start Game",
     action: {
@@ -26,13 +26,13 @@ const miniappConfig = {
 // For backward compatibility
 const frameConfig = {
   version: "1",
-  imageUrl: "https://uno-game-pi.vercel.app/images/hero-1.png",
+  imageUrl: "https://zunno.xyz/images/hero-1.png",
   button: {
     title: "Start Game",
     action: {
       type: "launch_frame",
       name: "Zunno",
-      url: "https://uno-game-pi.vercel.app/",
+      url: "https://zunno.xyz/",
       splashImageUrl: "https://zunno.xyz/images/logo.png",
       splashBackgroundColor: "#0000a8"
     }
@@ -40,8 +40,8 @@ const frameConfig = {
 };
 
 export const metadata = {
-  title: 'UNO Game',
-  description: 'A decentralized UNO game built on EVM chain',
+  title:  'Zunno',
+  description: 'A decentralized UNO game built on chain',
   other: {
     'fc:miniapp': JSON.stringify(miniappConfig),
     'fc:frame': JSON.stringify(frameConfig),

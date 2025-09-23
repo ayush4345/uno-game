@@ -2,13 +2,16 @@
  * OnchainKit wallet utilities for Game of Uno
  */
 import { useAccount } from 'wagmi';
-
+import { useActiveAccount } from "thirdweb/react";
 /**
  * Hook to get the connected wallet address
  * @returns The connected wallet address and connection status
  */
 export function useWalletAddress() {
-  const { address, isConnected } = useAccount();
+  const activeAccount = useActiveAccount();
+  const address = activeAccount?.address
+  const isConnected = address ? true : false
+  // const { address, isConnected } = useAccount();
   return { address, isConnected };
 }
 

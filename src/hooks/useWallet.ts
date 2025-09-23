@@ -4,12 +4,14 @@ import { useAccount, useDisconnect } from 'wagmi';
 import { useUserAccount } from '@/userstate/useUserAccount';
 import { useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { useWalletAddress } from '@/utils/onchainWalletUtils';
 
 /**
  * Custom hook to manage wallet connection state
  */
 export function useWallet() {
-  const { address, isConnected, chainId } = useAccount();
+  const {address, isConnected} = useWalletAddress();
+  const { chainId } = useAccount();
   const { disconnect } = useDisconnect();
   const { account, updateUserAccount } = useUserAccount();
   const { toast } = useToast();

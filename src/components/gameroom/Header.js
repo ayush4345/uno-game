@@ -2,9 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { useAccount } from "wagmi";
 import {WalletConnection} from "../WalletConnection";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 function Header({ roomCode }) {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected } = useWalletAddress();
 
   return (
     <div className="topInfo">

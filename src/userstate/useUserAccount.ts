@@ -4,6 +4,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { userAccountState, isUserConnectedState } from './userState';
 import { useEffect, useState } from 'react';
 import { useAccount, useEnsName, useEnsAvatar } from 'wagmi';
+import { useWalletAddress } from '@/utils/onchainWalletUtils';
 
 export function useUserAccount() {
   const [account, setAccount] = useRecoilState(userAccountState);
@@ -11,7 +12,7 @@ export function useUserAccount() {
   const [bytesAddress, setBytesAddress] = useState<string | null>(null);
   
   // Connect to Wagmi account with ENS support
-  const { address: wagmiAddress, isConnected: wagmiIsConnected } = useAccount();
+  const { address: wagmiAddress, isConnected: wagmiIsConnected } = useWalletAddress();
   const { data: ensName } = useEnsName({ address: wagmiAddress });
   const { data: ensAvatar } = useEnsAvatar({ name: ensName || undefined });
 

@@ -3,9 +3,10 @@
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useEffect } from "react";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
-import { inAppWallet } from "thirdweb/wallets";
+import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 const wallet = inAppWallet();
 
@@ -16,7 +17,7 @@ interface WalletConnectionProps {
 export function WalletConnection({ onConnect }: WalletConnectionProps) {
 
   // Use Wagmi hooks for Base Account integration
-  const { address } = useAccount();
+  const { address } = useWalletAddress();
   const { disconnect } = useDisconnect();
 
   const { connect } = useConnect();
@@ -31,11 +32,26 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
     }
   }, [address, onConnect]);
 
+  const wallets = [
+    inAppWallet({ auth: { options: ["farcaster", "google", "email", "apple"] } }),
+    createWallet("io.metamask"),
+    createWallet("com.coinbase.wallet"),
+    createWallet("me.rainbow"),
+  ];
+
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="max-w-xs">
-        <ConnectButton client={client} chain={baseSepolia} />
+        <ConnectButton 
+        client={client} 
+        chain={baseSepolia} 
+        wallets={wallets}
+        />
       </div>
     </div>
   );
 }
+
+// https://keys.coinbase.com/connect?sdkName=%40coinbase%2Fwallet-sdk&sdkVersion=4.3.0&origin=http%3A%2F%2Flocalhost%3A3000&coop=null
+
+// https://keys.coinbase.com/sign/eth-request-accounts?sdkName=%40coinbase%2Fwallet-sdk&sdkVersion=4.3.6&origin=https%3A%2F%2Fwww.zunno.xyz&coop=null

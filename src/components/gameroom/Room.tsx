@@ -20,6 +20,7 @@ import { baseSepolia } from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 type User = { 
   id: string;
@@ -39,7 +40,7 @@ const Room = () => {
   const [currentUser, setCurrentUser] = useState<User["name"]>("");
   const [gameStarted, setGameStarted] = useState(false);
   const { account, bytesAddress } = useUserAccount();
-  const { address } = useAccount();
+  const { address } = useWalletAddress();
   const [contract, setContract] = useState<UnoGameContract | null>(null)
   const [gameId, setGameId] = useState<bigint | null>(null)
   

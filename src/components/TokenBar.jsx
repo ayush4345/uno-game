@@ -8,9 +8,10 @@ import {
 import Link from "next/link";
 import {WalletConnection} from "./WalletConnection";
 import { useAccount } from "wagmi";
+import {useWalletAddress} from '@/utils/onchainWalletUtils';
 
 export default function TokenInfoBar() {
-    const { address } = useAccount();
+    const { address } = useWalletAddress();
     console.log(address)
 
     return (

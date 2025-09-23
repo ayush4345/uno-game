@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccount } from 'wagmi';
+import { useWalletAddress } from '@/utils/onchainWalletUtils';
 
 export default function BottomNavigation() {
   const pathname = usePathname();
-  const { isConnected } = useAccount();
+  const { isConnected } = useWalletAddress();
 
   // Don't show navigation if wallet is not connected
   if (!isConnected) {

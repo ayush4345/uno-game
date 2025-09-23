@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useAccount, useWalletClient } from "wagmi";
 // import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
-import { getContractNew } from "../../lib/web3";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { ethers } from "ethers";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
@@ -55,7 +55,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   const [rewardGiven, setRewardGiven] = useState(false);
 
   // Use Wagmi hooks for wallet functionality
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
 
   const { mutate: sendTransaction } = useSendTransaction();

@@ -12,6 +12,7 @@ import { useAccount, useConnect, useWalletClient, useWriteContract, useWaitForTr
 import BottomNavigation from "@/components/BottomNavigation";
 import GameCard from "./gameCard";
 import Link from "next/link";
+import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useChains } from 'wagmi'
 import { client } from "@/utils/thirdWebClient";
 import { baseSepolia } from "@/lib/chains";
@@ -35,7 +36,7 @@ export default function PlayGame() {
   const chains = useChains();
 
   // Use Wagmi hooks for wallet functionality
-  const { address, isConnected } = useAccount();
+  const { address, isConnected,  } = useWalletAddress();
   const { data: walletClient } = useWalletClient();
   const { account: recoilAccount } = useUserAccount();
   const { mutate: sendTransaction } = useSendTransaction();
