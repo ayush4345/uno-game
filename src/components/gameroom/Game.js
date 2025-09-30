@@ -113,7 +113,9 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         console.log('Computer notices draw pile is empty, will trigger reshuffle on draw');
       }
       
-      // Draw a card if no valid moves - with new rule, computer will always draw one card and end turn
+      // Draw a card if no valid moves
+      // With new rule, if the drawn card is playable, the computer will play it automatically
+      // This is handled in onCardDrawnHandler with the isPlayable check and setTimeout
       return "draw";
     }
   };
@@ -124,24 +126,27 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       const computerTurnDelay = setTimeout(() => {
         // Check if computer should declare UNO (when it has 2 cards and will play one)
         if (player2Deck.length === 2) {
-          dispatch({ isUnoButtonPressed: true });
           playUnoSound();
         }
         
         const computerMove = computerMakeMove();
         
         if (computerMove === "draw") {
-          // Computer draws a card and automatically ends turn (as per new rule)
+          // Computer draws a card
+          // If the drawn card is playable, the computer will automatically play it
+          // This is handled in onCardDrawnHandler with the isPlayable check and setTimeout
           onCardDrawnHandler();
+          // Note: We don't need to do anything else here because onCardDrawnHandler
+          // will handle playing the card if it's playable
         } else {
-          // Computer plays a card
+          // Computer plays a card from its existing hand
           onCardPlayedHandler(computerMove);
         }
       }, 3000); // 3 second delay for better UX
 
       return () => clearTimeout(computerTurnDelay);
     }
-  }, [turn, isComputerMode, gameOver, player2Deck, currentColor, currentNumber]);
+  }, [turn, isComputerMode, gameOver]); // Removed player2Deck, currentColor, currentNumber to prevent re-triggering
 
   //handles the sounds with our custom sound provider
   const {
@@ -392,7 +397,9 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
     //did player press UNO when 2 cards were remaining in their deck
     //if not then add 2 cards as penalty else continue
-    if (playerDeck.length === 2 && !isUnoButtonPressed) {
+    // In computer mode, computer (Player 2) automatically calls UNO, so skip penalty for computer
+    const isComputerPlayer = isComputerMode && cardPlayedBy === "Player 2";
+    if (playerDeck.length === 2 && !isUnoButtonPressed && !isComputerPlayer) {
       alert("Oops! You forgot to press UNO. You drew 2 cards as penalty.");
       //pull out last two cards from draw card pile and add them to player's deck
       const penaltyCard1 = drawCardWithReshuffle();
@@ -401,6 +408,10 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       const penaltyCard2 = drawCardWithReshuffle();
       if (penaltyCard2) updatedPlayerDeck.push(penaltyCard2);
     } 
+    
+    // Reset Uno button after checking for penalty
+    // This ensures the penalty check sees the correct UNO button state
+    dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false }); 
     
     // Create a more explicit update of player decks to prevent card transfer issues
     let newPlayer1Deck, newPlayer2Deck;
@@ -453,11 +464,12 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
   //driver functions
   const onCardPlayedHandler = (played_card) => {
+    // This function handles playing a card, either from the player's hand or a card that was just drawn
+    // With the new rule, if a player draws a card that matches the current color, number, or is a wild card,
+    // they can play it immediately and this function will be called
+    
     //extract player who played the card
     const cardPlayedBy = turn;
-
-    // Reset Uno button when any card is played
-    dispatch({ type: "SET_UNO_BUTTON_PRESSED", isUnoButtonPressed: false });
 
     // Update the last player who played a card
     dispatch({
@@ -497,6 +509,38 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         else {
           console.log('Invalid skip card move:', { isColorMatch, isNumberMatch });
           alert("Invalid Move! Skip cards must match either the color or number of the current card.");
+        }
+        break;
+      }
+      case "_R":
+      case "_G":
+      case "_B":
+      case "_Y": {
+        //extract color of played skip card
+        const colorOfPlayedCard = played_card.charAt(1);
+        const numberOfPlayedCard = 100;
+        // Normalize the values for comparison
+        const normalizedCurrentNumber = String(currentNumber);
+        const normalizedPlayedNumber = String(numberOfPlayedCard);
+        
+        // Check for color match or number match
+        const isColorMatch = currentColor === colorOfPlayedCard;
+        const isNumberMatch = normalizedCurrentNumber === normalizedPlayedNumber;
+        
+        if (isColorMatch || isNumberMatch) {
+          console.log('Valid reverse card move:', { isColorMatch, isNumberMatch });
+          cardPlayedByPlayer({
+            cardPlayedBy,
+            played_card,
+            colorOfPlayedCard,
+            numberOfPlayedCard,
+            toggleTurn: false,
+          });
+        }
+        //if no color or number match, invalid move - do not update state
+        else {
+          console.log('Invalid reverse card move:', { isColorMatch, isNumberMatch });
+          alert("Invalid Move! reverse cards must match either the color or number of the current card.");
         }
         break;
       }
@@ -671,8 +715,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
   const onCardDrawnHandler = () => {
     //extract player who drew the card
-    // let drawButtonPressed = true;
-    // let turnCopy = turn;
     let drawButtonPressed = false; // Always set to false to disable draw button after drawing
     //remove 1 new card from drawCardPile and send it to playerDrawn method
     let copiedDrawCardPileArray = [...drawCardPile];
@@ -741,19 +783,33 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
       numberOfDrawnCard = 200;
     }
 
-    // if (
-    //   drawCard !== "W" &&
-    //   drawCard !== "D4W" &&
-    //   currentNumber !== numberOfDrawnCard &&
-    //   currentColor !== colorOfDrawnCard
-    // ) {
-    //   turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
-    //   drawButtonPressed = false;
-    // }
+    // NEW RULE: Check if the drawn card is playable
+    // A card is playable if it matches the current color, number, or is a wild card
+    const isWildCard = drawCard === "W" || drawCard === "D4W";
     
-    // Modified rule: Always pass turn after drawing a card
-    // regardless of whether the drawn card is playable or not
-    const turnCopy = turn === "Player 1" ? "Player 2" : "Player 1";
+    // Normalize the values for comparison (ensure they're both strings)
+    const normalizedCurrentNumber = String(currentNumber);
+    const normalizedDrawnNumber = String(numberOfDrawnCard);
+    
+    // Check if the drawn card matches the current card's color or number
+    const isColorMatch = currentColor === colorOfDrawnCard;
+    const isNumberMatch = normalizedCurrentNumber === normalizedDrawnNumber;
+    const isPlayable = isWildCard || isColorMatch || isNumberMatch;
+    
+    console.log('Card drawn:', drawCard, 'Playable:', isPlayable, { isWildCard, isColorMatch, isNumberMatch });
+    
+    // Only change turn if the drawn card is NOT playable
+    const turnCopy = isPlayable ? turn : (turn === "Player 1" ? "Player 2" : "Player 1");
+    
+    // Show toast notification if the card is playable
+    // if (isPlayable) {
+    //   toast({
+    //     title: "Playable Card",
+    //     description: "You drew a playable card! You can play it now.",
+    //     variant: "default",
+    //     duration: 3000,
+    //   });
+    // }
 
     if (isComputerMode) {
       // Handle locally for computer mode
@@ -765,6 +821,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         playedCardsPile: updatedPlayedCardsPile, // Include updated played cards pile
         drawButtonPressed,
       });
+      
+      // For computer mode, if computer draws a playable card, play it automatically after a delay
+      if (isPlayable && turn === "Player 2") {
+        setTimeout(() => {
+          onCardPlayedHandler(drawCard);
+        }, 1500); // 1.5 second delay for better UX
+      }
     } else {
       //send new state to server for multiplayer mode
       socket.emit("updateGameState", {
