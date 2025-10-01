@@ -53,6 +53,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogCallback, setDialogCallback] = useState(null);
   const [rewardGiven, setRewardGiven] = useState(false);
+  const [computerMoveCounter, setComputerMoveCounter] = useState(0);
 
   // Use Wagmi hooks for wallet functionality
   const { address, isConnected } = useWalletAddress();
@@ -146,7 +147,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
       return () => clearTimeout(computerTurnDelay);
     }
-  }, [turn, isComputerMode, gameOver]); // Removed player2Deck, currentColor, currentNumber to prevent re-triggering
+  }, [turn, isComputerMode, gameOver, computerMoveCounter]); // Added computerMoveCounter to re-trigger after special cards
 
   //handles the sounds with our custom sound provider
   const {
@@ -504,6 +505,11 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
             numberOfPlayedCard,
             toggleTurn: false,
           });
+          
+          // Trigger another computer move after playing skip (turn stays with computer)
+          if (isComputerMode && cardPlayedBy === "Player 2") {
+            setComputerMoveCounter(prev => prev + 1);
+          }
         }
         //if no color or number match, invalid move - do not update state
         else {
@@ -536,6 +542,11 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
             numberOfPlayedCard,
             toggleTurn: false,
           });
+          
+          // Trigger another computer move after playing reverse (turn stays with computer)
+          if (isComputerMode && cardPlayedBy === "Player 2") {
+            setComputerMoveCounter(prev => prev + 1);
+          }
         }
         //if no color or number match, invalid move - do not update state
         else {
@@ -570,6 +581,11 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
             isDraw2: true,
             toggleTurn: false,
           });
+          
+          // Trigger another computer move after playing +2 (turn stays with computer)
+          if (isComputerMode && cardPlayedBy === "Player 2") {
+            setComputerMoveCounter(prev => prev + 1);
+          }
         }
         //if no color or number match, invalid move - do not update state
         else {
@@ -597,6 +613,11 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
               toggleTurn: played_card !== 'D4W',
             };
             cardPlayedByPlayer(cardDetails);
+            
+            // Trigger another computer move after playing +4 (turn stays with computer)
+            if (played_card === 'D4W') {
+              setComputerMoveCounter(prev => prev + 1);
+            }
           } else {
             //ask for new color via dialog for human players
             setIsDialogOpen(true);
@@ -797,7 +818,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     const isPlayable = isWildCard || isColorMatch || isNumberMatch;
     
     console.log('Card drawn:', drawCard, 'Playable:', isPlayable, { isWildCard, isColorMatch, isNumberMatch });
-    
     // Only change turn if the drawn card is NOT playable
     const turnCopy = isPlayable ? turn : (turn === "Player 1" ? "Player 2" : "Player 1");
     
@@ -822,11 +842,13 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
         drawButtonPressed,
       });
       
-      // For computer mode, if computer draws a playable card, play it automatically after a delay
+      // For computer mode, if computer draws a playable card, trigger another move
+      // Use computerMoveCounter to ensure fresh state instead of setTimeout with stale closure
       if (isPlayable && turn === "Player 2") {
+        console.log('Computer drew playable card:', drawCard, 'Will play on next turn cycle');
         setTimeout(() => {
-          onCardPlayedHandler(drawCard);
-        }, 1500); // 1.5 second delay for better UX
+          setComputerMoveCounter(prev => prev + 1);
+        }, 1000);
       }
     } else {
       //send new state to server for multiplayer mode
@@ -912,7 +934,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
 
       // Since we're not actually calling the API currently, just mark the reward as given
       if (true) {
-        console.log('Successfully created claimable balance for winner!');
         setRewardGiven(true);
 
         // If we were calling the API, we would use the balanceId from the response
