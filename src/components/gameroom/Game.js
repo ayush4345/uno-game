@@ -818,7 +818,6 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     const isPlayable = isWildCard || isColorMatch || isNumberMatch;
     
     console.log('Card drawn:', drawCard, 'Playable:', isPlayable, { isWildCard, isColorMatch, isNumberMatch });
-    
     // Only change turn if the drawn card is NOT playable
     const turnCopy = isPlayable ? turn : (turn === "Player 1" ? "Player 2" : "Player 1");
     
