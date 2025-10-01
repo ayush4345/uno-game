@@ -60,6 +60,15 @@ export default function PlayGame() {
     method: "getNotStartedGames",
   });
 
+  // Auto-refetch active games every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchGames();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [refetchGames]);
+
   useEffect(() => {
     if (!socket.current) {
       socket.current = io(CONNECTION, {
