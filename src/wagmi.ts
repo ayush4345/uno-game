@@ -7,7 +7,7 @@ import {
 } from '@rainbow-me/rainbowkit/wallets';
 import { useMemo } from 'react';
 import { http, createConfig } from 'wagmi';
-import { base, baseSepolia } from 'wagmi/chains';
+import { base, baseSepolia, celoSepolia } from 'wagmi/chains';
 
 export function useWagmiConfig() {
   const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? '';

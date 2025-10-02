@@ -10,7 +10,7 @@ import ColourDialog from "./colourDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useAccount, useWalletClient } from "wagmi";
-// import { addClaimableBalance, claimableBalancesApi } from '@/utils/supabase';
+import {celoSepolia} from "@/lib/chains";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { ethers } from "ethers";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
@@ -960,7 +960,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
             contract: {
               address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
               abi: unoGameABI,
-              chain: baseSepolia,
+              chain: celoSepolia,
               client,
             },
             method: "endGame",

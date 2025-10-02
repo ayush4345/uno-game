@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useActiveAccount, ConnectButton } from "thirdweb/react";
 import { createWallet, inAppWallet } from "thirdweb/wallets";
 import { client } from "@/utils/thirdWebClient";
-import { baseSepolia } from "@/lib/chains";
+import { baseSepolia, celoSepolia } from "@/lib/chains";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 
 const wallet = inAppWallet();
@@ -44,7 +44,7 @@ export function WalletConnection({ onConnect }: WalletConnectionProps) {
       <div className="max-w-xs">
         <ConnectButton 
         client={client} 
-        chain={baseSepolia} 
+        chain={celoSepolia} 
         wallets={wallets}
         />
       </div>

@@ -16,7 +16,7 @@ import UnoGameABI from '@/constants/UnoGame.json';
 import { unoGameABI } from "@/constants/unogameabi";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { getContract, prepareContractCall } from "thirdweb";
-import { baseSepolia } from "@/lib/chains";
+import { baseSepolia , celoSepolia} from "@/lib/chains";
 import { client } from "@/utils/thirdWebClient";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -417,7 +417,7 @@ const Room = () => {
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
-            chain: baseSepolia,
+            chain: celoSepolia,
             client,
           },
           method: "startGame",

@@ -1,10 +1,10 @@
 import { createConfig, http } from 'wagmi';
-import { base, baseSepolia } from 'wagmi/chains';
+import { base, baseSepolia, celoSepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 // Create Wagmi config with Base and Base Sepolia chains
 export const wagmiConfig = createConfig({
-  chains: [base, baseSepolia],
+  chains: [base, baseSepolia, celoSepolia],
   connectors: [
     coinbaseWallet({
       appName: 'Zunno',
@@ -15,5 +15,6 @@ export const wagmiConfig = createConfig({
   transports: {
     [base.id]: http(),
     [baseSepolia.id]: http(),
+    [celoSepolia.id]: http()
   },
 });

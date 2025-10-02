@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useWalletAddress } from "@/utils/onchainWalletUtils";
 import { useChains } from 'wagmi'
 import { client } from "@/utils/thirdWebClient";
-import { baseSepolia } from "@/lib/chains";
+import { baseSepolia, celoSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
@@ -50,7 +50,7 @@ export default function PlayGame() {
 
   const contract = getContract({
     client,
-    chain:  baseSepolia,
+    chain:  celoSepolia,
     address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
     abi: unoGameABI,
   });
@@ -122,7 +122,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: baseSepolia,
+          chain: celoSepolia,
           client,
         },
         method: "createGame",
@@ -175,7 +175,7 @@ export default function PlayGame() {
           contract: {
             address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
             abi: unoGameABI,
-            chain: baseSepolia,
+            chain: celoSepolia,
             client,
           },
           method: "createGame",
@@ -195,7 +195,7 @@ export default function PlayGame() {
 
             const receipt = await waitForReceipt({
               client,
-              chain: baseSepolia,
+              chain: celoSepolia,
               transactionHash: result.transactionHash,
             });
 
@@ -278,7 +278,7 @@ export default function PlayGame() {
         contract: {
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: unoGameABI,
-          chain: baseSepolia,
+          chain: celoSepolia,
           client,
         },
         method: "joinGame",
