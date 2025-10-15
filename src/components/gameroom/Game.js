@@ -1034,8 +1034,10 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     }
   }, [gameOver, winner, rewardGiven]);
 
+  const cleanedTurn = turn.split(" ").join("");
+
   return (
-    <div className={`backgroundColor${currentColor}`}>
+    <div className={`backgroundColor${currentColor}${cleanedTurn}`}>
       {/* <MemoizedHeader roomCode={room} /> */}
       {!gameOver ? (
         <>

@@ -145,7 +145,6 @@ const GameScreen = ({
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      padding: "1rem"
     }}>
       {/* Game Header */}
       <div
@@ -155,7 +154,10 @@ const GameScreen = ({
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "1rem",
-          position: "absolute"
+          marginTop: "1rem",
+          marginLeft: "1rem",
+          position: "absolute",
+          zIndex: "50"
         }}
       >
         <button
@@ -210,7 +212,7 @@ const GameScreen = ({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          height: "calc(100vh - 100px)",
+          height: "calc(100vh)",
         }}
       >
         <div
@@ -220,7 +222,8 @@ const GameScreen = ({
             flexDirection: "column",
             alignItems: "center",
             position: "relative",
-            marginBottom: "24px"
+            marginBottom: "24px",
+            marginTop: "1rem"
           }}
         >
           <div
@@ -385,6 +388,7 @@ const GameScreen = ({
           className="player-section"
           style={{
             marginTop: "1rem",
+            paddingBottom: "110px"
           }}
         >
           <div
@@ -396,7 +400,7 @@ const GameScreen = ({
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
-              <div
+              {/* <div
                 className="avatar-container"
                 style={{
                   width: "3rem",
@@ -450,27 +454,25 @@ const GameScreen = ({
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
                 </div>
-              </div>
-              <div>
-                <div style={{ color: "white", fontWeight: "bold" }}>You</div>
+              </div> */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <div
                   style={{
+                    backgroundColor: "rgba(76, 29, 29, 0.95)",
+                    borderRadius: "1.5rem",
+                    padding: "0.5rem 1.5rem",
                     color: "white",
-                    fontSize: "0.875rem",
-                    display: turn === currentUser ? "block" : "none",
-                    animation: turn === currentUser ? "fadeInOut 1.5s infinite" : "none",
-                    fontWeight: "bold"
+                    fontSize: "1.25rem",
+                    fontWeight: "bold",
+                    letterSpacing: "0.1em",
+                    fontFamily: "monospace",
+                    textAlign: "center",
+                    minWidth: "120px",
+                    visibility: turn === currentUser ? "visible" : "hidden",
                   }}
                 >
-                  ✨ Your Turn ({turnTimeRemaining}s) ✨
+                  {Math.floor(turnTimeRemaining / 60).toString().padStart(2, '0')}:{(turnTimeRemaining % 60).toString().padStart(2, '0')}
                 </div>
-                <style jsx>{`
-                  @keyframes fadeInOut {
-                    0% { opacity: 0.7; }
-                    50% { opacity: 1; }
-                    100% { opacity: 0.7; }
-                  }
-                `}</style>
               </div>
             </div>
           </div>

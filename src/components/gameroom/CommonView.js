@@ -24,7 +24,7 @@ const CommonView = ({
   return (
     <div style={{ position: "relative", width: "100%" }}>
       {/* Hide the buttons as they're now handled in the parent component */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", height: "100vh" }}>
         {/* <StyledButton
           className='bg-green-500'
           disabled={isDrawDisabled}
@@ -40,15 +40,17 @@ const CommonView = ({
             alignItems: "center",
             pointerEvents: (isDrawDisabled || isDrawing) ? "none" : "auto",
             filter: (isDrawDisabled || isDrawing) ? "grayscale(1)" : "none",
-            width: "6rem",
-            marginTop: "10rem"
+            width: "4rem",
+            marginTop: "10rem",
+            position: "absolute",
+            left: "50%",
+            transform: "translate(-50%,70px)"
           }}
           role="button"
           disabled={isDrawDisabled || isDrawing}
           onClick={handleDrawCard}
         >
           <img src="/images/draw.png" alt="draw" />
-          <div style={{ color: "white", fontSize: "0.875rem", fontWeight: "bold" }}>Draw Deck</div>
         </button>
       {playedCardsPile && playedCardsPile.length > 0 && (
         <div style={{
@@ -80,6 +82,10 @@ const CommonView = ({
           style={{
             display: "flex",
             justifyContent: "center",
+            position: "absolute",
+            bottom: "-80px",
+            left: "50%",
+            transform: "translateX(-50%)"
           }}
         >
           <button
@@ -89,7 +95,7 @@ const CommonView = ({
               color: "white",
               fontWeight: "bold",
               fontSize: "1rem",
-              width: "6rem",
+              width: "10rem",
               filter: isUnoDisabled ? "grayscale(1)" : "none",
               marginTop: "10rem"
             }}
