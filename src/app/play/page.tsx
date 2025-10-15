@@ -19,6 +19,7 @@ import { baseSepolia } from "@/lib/chains";
 import { unoGameABI } from "@/constants/unogameabi";
 import { useReadContract, useActiveAccount, useSendTransaction } from "thirdweb/react";
 import { waitForReceipt, getContract, prepareContractCall } from "thirdweb";
+import ProfileDropdown from "@/components/profileDropdown"
 
 const CONNECTION =
   process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
@@ -378,34 +379,26 @@ export default function PlayGame() {
 
   return (
     <div
-    className="min-h-screen text-white relative overflow-hidden" 
-    style={{
-    background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)' 
-  }}
+      className="min-h-screen text-white relative overflow-hidden bg-[url('/images/bg_effect.png')]"
+      style={{
+        background:
+          'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%), url("/images/bg_effect.png")',
+        backgroundBlendMode: "overlay",
+      }}
     >
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-black/10"></div>
-        
-        <div className="absolute top-0 left-0 right-0 h-[30%] bg-gradient-to-b from-purple-500/10 to-transparent"></div>
-        
-        <div className="absolute top-[10%] left-[5%] w-[300px] h-[300px] rounded-full bg-blue-500/20 blur-[100px] animate-pulse"></div>
-        <div className="absolute bottom-[20%] right-[10%] w-[250px] h-[250px] rounded-full bg-purple-500/20 blur-[80px] animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-[40%] right-[20%] w-[200px] h-[200px] rounded-full bg-pink-500/10 blur-[60px] animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
-
       {/* Header */}
-      <div className="flex items-center justify-between p-4 pt-12">
+      <div className="flex items-center justify-between p-6 pt-12">
         <div className="flex items-center space-x-3">
-          <div className="w-16 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden">
+          <div className="w-16 h-12 rounded-full flex items-center justify-center overflow-hidden">
             <Link href="/">
               <img src="/images/logo.png" alt="" />
             </Link>
           </div>
         </div>
-        
-        {isConnected && (
-          <div className="flex items-center space-x-2">
-            <WalletConnection />
+
+        {isConnected && address && (
+          <div className="flex items-center space-x-3">
+            <ProfileDropdown address={address} />
           </div>
         )}
       </div>
@@ -419,182 +412,142 @@ export default function PlayGame() {
           <WalletConnection />
         </div>
       ) : (
-        <div className="px-4">
-          {/* Welcome Section */}
-          <div className="text-center mb-2">
-            <h1 className="text-2xl font-bold">Welcome Back!</h1>
-            <p className="text-gray-300 text-sm mb-1">Ready to challenge?</p>
-          </div>
-
-          {/* Game Modes Section */}
-          <div className="mb-8">
-            {/* <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Game Modes</h2>
-              <button className="text-cyan-400 text-sm font-medium">View All</button>
-            </div> */}
-
-            <div className="grid grid-cols-2 gap-4">
-              {/* Quick Match Card */}
-              <div 
-                className="rounded-3xl relative overflow-hidden min-h-[160px] cursor-pointer transition-all duration-300 active:translate-y-1 border border-white/10"
-                style={{
-                  background: 'linear-gradient(180deg, #4a9eff 0%, #0069e3 100%)',
-                  boxShadow: '0 10px 20px rgba(0, 105, 227, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)'
-                }}
-                onClick={startComputerGame}
-              >
-                {/* Glossy shine overlay */}
-                <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
-                
-                {/* Side shine effect */}
-                <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
-                
-                {/* Content container with padding */}
-                <div className="relative p-3 h-full flex flex-col">
-                  {/* Icon */}
-                  {/* <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
-                    <span className="text-2xl text-white">⚡</span>
-                  </div> */}
-                  
-                  {/* Text content */}
-                  <div className="mt-auto">
-                    <h3 className="font-bold text-2xl mb-2 text-white">Quick Match</h3>
-                    <p className="text-white/80 text-sm mb-3">Play against AI opponent</p>
-                    {/* <div className="flex items-center text-white/70 text-sm">
-                      <span>Coming soon...</span>
-                    </div> */}
-                  </div>
+        <div className="px-6">
+          {/* Main Action Cards */}
+          <div className="space-y-4 mb-8">
+            {/* Create a Room Card */}
+            <div
+              className="h-28 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden"
+              style={{
+                background: 'radial-gradient(73.45% 290.46% at 73.45% 17.68%, #9E2B31 0%, #D4D42E 100%)'
+              }}
+              onClick={createGame}
+            >
+              <div className="absolute left-0 top-0 opacity-100">
+                <div className="w-24 h-28 rounded-lg flex items-center justify-center relative overflow-hidden">
+                  <img 
+                    src="/images/hand_uno.png" 
+                    className="w-full h-full object-cover" 
+                    style={{maskImage: 'linear-gradient(to left, transparent 0%, black 50%)'}}
+                  />
                 </div>
-                {computerCreateLoading && (
-                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
-                    <div className="text-white font-medium">Creating...</div>
-                  </div>
-                )}
               </div>
-
-              {/* Create Room Card */}
-              <div 
-                className="rounded-3xl relative overflow-hidden min-h-[160px] cursor-pointer transition-all duration-300 active:translate-y-1 border border-white/10"
-                onClick={createGame}
-                style={{
-                  background: 'linear-gradient(180deg, #ff5a87 0%, #e3003a 100%)',
-                  boxShadow: '0 10px 20px rgba(227, 0, 58, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.1), inset 0 2px 0 rgba(255, 255, 255, 0.3)'
-                }}
-              >
-                {/* Glossy shine overlay */}
-                <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-white/30 to-transparent rounded-t-3xl pointer-events-none"></div>
-                
-                {/* Side shine effect */}
-                <div className="absolute top-[5%] bottom-[5%] left-0 w-[3px] bg-gradient-to-b from-white/0 via-white/50 to-white/0 pointer-events-none"></div>
-                
-                {/* Content container with padding */}
-                <div className="relative p-3 h-full flex flex-col">
-                  {/* Icon */}
-                  {/* <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg mb-4">
-                    <span className="text-2xl font-bold text-white">+</span>
-                  </div> */}
-                  
-                  {/* Text content */}
-                  <div className="mt-auto">
-                    <h3 className="font-bold text-2xl mb-2 text-white">Create Room</h3>
-                    <p className="text-white/80 text-sm mb-3">Custom settings & invite friends</p>
-                  </div>
-                </div>
-                {createLoading && (
-                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center">
-                    <div className="text-white font-medium">Creating...</div>
-                  </div>
-                )}
+              <div className="relative z-10">
+                <h3 className="text-white text-xl font-bold mb-2 text-end">
+                  Create a Room
+                </h3>
+                <p className="text-white/80 text-sm text-end">
+                  bring along the fun with your folks
+                </p>
               </div>
+              {createLoading && (
+                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                  <div className="text-white font-medium">Creating...</div>
+                </div>
+              )}
+            </div>
 
-              {/* Tournament Card */}
-              {/* <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
-                <div className="absolute top-4 left-4">
-                  <div className="w-12 h-12 bg-purple-400/30 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🏆</span>
-                  </div>
+            {/* Quick Game Card */}
+            <div
+              className="h-28 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden"
+              style={{
+                background: 'radial-gradient(39.28% 143.53% at 36% -12.35%, #2E94D4 0%, #410B4A 100%)'
+              }}
+              onClick={startComputerGame}
+            >
+              <div className="absolute right-0 top-0 opacity-100">
+                <div className="w-24 h-28 rounded-lg flex items-center justify-center">
+                  <img 
+                  src="/images/bot_uno.png"
+                  className="w-full h-full object-cover" 
+                  style={{maskImage: 'linear-gradient(to right, transparent 0%, black 50%)'}}
+                  />
                 </div>
-                <div className="mt-16">
-                  <h3 className="font-bold text-lg mb-2">Tournament</h3>
-                  <p className="text-purple-100 text-sm mb-3">Compete for big prizes</p>
-                  <div className="flex items-center text-yellow-300 text-sm font-medium">
-                    <span className="mr-2">💰</span>
-                    <span>10,000 ZUNNO</span>
-                  </div>
-                  <div className="text-yellow-300 text-xs">Prize Pool</div>
+              </div>
+              <div className="relative z-10 ">
+                <h3 className="text-white text-xl font-bold mb-2">
+                  Quick Game
+                </h3>
+                <p className="text-white/80 text-sm">
+                  beat the bot and bake a win !
+                </p>
+              </div>
+              {computerCreateLoading && (
+                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                  <div className="text-white font-medium">Creating...</div>
                 </div>
-              </div> */}
-
-              {/* Practice Card */}
-              {/* <div className="bg-gradient-to-br from-green-500 to-green-700 rounded-3xl p-6 relative overflow-hidden min-h-[160px]">
-                <div className="absolute top-4 left-4">
-                  <div className="w-12 h-12 bg-green-400/30 rounded-full flex items-center justify-center">
-                    <span className="text-2xl">🎯</span>
-                  </div>
-                </div>
-                <div className="mt-16">
-                  <h3 className="font-bold text-lg mb-2">Practice</h3>
-                  <p className="text-green-100 text-sm mb-3">Play against AI opponents</p>
-                  <div className="flex items-center text-green-100 text-sm">
-                    <span className="mr-2">🤖</span>
-                    <span>No gas fees</span>
-                  </div>
-                </div>
-              </div> */}
+              )}
             </div>
           </div>
 
-          {/* Available Rooms Section */}
-          <div className="mb-24">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold">Available Rooms</h2>
-              {/* <button
-                onClick={createGame}
-                disabled={createLoading}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 px-4 py-2 rounded-xl font-semibold text-sm transition-all transform hover:scale-105 active:scale-95"
-              >
-                {createLoading ? "Creating..." : "+ Create"}
-              </button> */}
+          {/* Tabs Section */}
+          <div className="mb-6">
+            <div className="flex space-x-8">
+              <button className="text-white font-semibold text-lg border-b-2 border-white pb-2">
+                ROOMS
+              </button>
             </div>
-            
-            {activeGames && activeGames.length > 0 ? (
-              <div className="bg-gray-800/30 rounded-3xl p-4">
-                <ScrollArea className="max-h-80">
-                  <div className="space-y-3">
-                    {activeGames.toReversed().map((gameId, index) => (
-                      <GameCard
-                        key={index}
-                        index={index}
-                        gameId={gameId}
-                        joinGame={joinGame}
-                        joinLoading={joiningGameId !== null && joiningGameId.toString() === gameId.toString()}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
-            ) : (
-              <div className="bg-gray-800/30 rounded-3xl p-8 text-center">
-                <div className="text-gray-400 mb-4">
-                  <span className="text-4xl">🎮</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">No Active Rooms</h3>
-                <p className="text-gray-400 text-sm mb-4">Be the first to create a room and start playing!</p>
-                <button
-                  onClick={createGame}
-                  disabled={createLoading}
-                  className={`glossy-button glossy-button-red transition-all duration-300 ${createLoading ? 'opacity-70' : ''}`}
+          </div>
+
+          {/* Room Cards Grid */}
+          <div className="grid grid-cols-2 gap-4 mb-24 h-[calc(100vh-600px)] overflow-y-auto grid-rows-[7rem]">
+            {activeGames && activeGames?.length > 0 ? (
+              activeGames.toReversed().map((game, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-br h-28 from-purple-600/20 to-purple-800/20 backdrop-blur-sm rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] border border-purple-500/30"
+                  onClick={() => joinGame(game)}
                 >
-                  {createLoading ? "Creating Room..." : "Create Room"}
-                </button>
-              </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-bold text-lg">
+                      #{game.toString()}
+                    </h3>
+                    {/* <span className="text-gray-300 text-sm">{Math.floor(Math.random() * 20) + 1}m</span> */}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">👤</span>
+                    </div>
+                    <div className="text-white">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M9 18L15 12L9 6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  {joiningGameId !== null &&
+                    joiningGameId === game && (
+                      <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center">
+                        <div className="text-white font-medium">Joining...</div>
+                      </div>
+                    )}
+                </div>
+              ))
+            ) : (
+              // Placeholder rooms when no games available
+              <>
+                    <div className="flex items-center justify-between">
+                      <div className="text-gray-400 text-sm">
+                        No room available
+                      </div>
+                    </div>
+              </>
             )}
           </div>
         </div>
       )}
-      
       <BottomNavigation />
-      
       <Toaster />
     </div>
   );
