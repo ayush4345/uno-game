@@ -40,7 +40,7 @@ const CommonView = ({
             alignItems: "center",
             pointerEvents: (isDrawDisabled || isDrawing) ? "none" : "auto",
             filter: (isDrawDisabled || isDrawing) ? "grayscale(1)" : "none",
-            width: "4rem",
+            width: "5rem",
             marginTop: "10rem",
             position: "absolute",
             left: "50%",
