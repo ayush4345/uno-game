@@ -44,7 +44,7 @@ const CommonView = ({
             marginTop: "10rem",
             position: "absolute",
             left: "50%",
-            transform: "translate(-50%,70px)"
+            transform: "translate(-50%,56px)"
           }}
           role="button"
           disabled={isDrawDisabled || isDrawing}
@@ -83,7 +83,7 @@ const CommonView = ({
             display: "flex",
             justifyContent: "center",
             position: "absolute",
-            bottom: "-80px",
+            bottom: "-52px",
             left: "50%",
             transform: "translateX(-50%)"
           }}

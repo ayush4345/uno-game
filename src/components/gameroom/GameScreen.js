@@ -388,7 +388,7 @@ const GameScreen = ({
           className="player-section"
           style={{
             marginTop: "1rem",
-            paddingBottom: "110px"
+            paddingBottom: "80px"
           }}
         >
           <div

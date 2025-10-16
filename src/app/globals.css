@@ -149,7 +149,7 @@
 
 .backgroundColorRPlayer1 {
   background-image: url("/assets/play_bg/red_player1.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -158,7 +158,7 @@
 
 .backgroundColorRPlayer2 {
   background-image: url("/assets/play_bg/red_player2.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -176,7 +176,7 @@
 
 .backgroundColorGPlayer1 {
   background-image: url("/assets/play_bg/green_player1.png");
-  background-size: auto 100%; 
+  background-size: cover; 
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -185,7 +185,7 @@
 
 .backgroundColorGPlayer2 {
   background-image: url("/assets/play_bg/green_player2.png");
-  background-size: auto 100%; 
+  background-size: cover; 
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -203,7 +203,7 @@
 
 .backgroundColorBPlayer1 {
   background-image: url("/assets/play_bg/blue_player1.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -212,7 +212,7 @@
 
 .backgroundColorBPlayer2 {
   background-image: url("/assets/play_bg/blue_player2.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -230,7 +230,7 @@
 
 .backgroundColorYPlayer1 {
   background-image: url("/assets/play_bg/yellow_player1.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
@@ -239,7 +239,7 @@
 
 .backgroundColorYPlayer2 {
   background-image: url("/assets/play_bg/yellow_player2.png");
-  background-size: auto 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   background-color: currentcolor;
