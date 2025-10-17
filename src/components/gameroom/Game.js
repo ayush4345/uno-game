@@ -1034,7 +1034,7 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
     }
   }, [gameOver, winner, rewardGiven]);
 
-  const cleanedTurn = turn.split(" ").join("");
+  const cleanedTurn = turn == currentUser ? "current" : "opponent"
 
   return (
     <div className={`backgroundColor${currentColor}${cleanedTurn}`}>

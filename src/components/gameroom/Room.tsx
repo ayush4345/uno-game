@@ -501,7 +501,7 @@ const Room = () => {
       style={{
         height: "100vh",
         width: "100vw",
-        backgroundImage: "url('/bg_primary.png')",
+        backgroundImage: "url('/bg_primary.webp')",
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
