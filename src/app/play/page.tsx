@@ -293,6 +293,7 @@ export default function PlayGame() {
             title: "Game joined successfully!",
             description: "Game joined successfully!",
             duration: 5000,
+            variant: "success",
           });
           router.push(`/game/${gameId}`);
         },
