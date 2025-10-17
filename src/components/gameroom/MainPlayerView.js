@@ -40,8 +40,8 @@ const MainPlayerView = ({
                   transform: isPlayable ? `rotate(${cardAngle}deg) translateY(-10px)` : `rotate(${cardAngle}deg)`,
                   zIndex: 100 + i
                 },
-                zoom: turn != mainPlayer ? "0.88":"1.04",
-                filter: turn === mainPlayer ? "brightness(0.9)": ""
+                zoom: turn != mainPlayer ? "0.85":"1.04",
+                filter: turn != mainPlayer ? "brightness(0.75)": ""
               }}
             >
               <img

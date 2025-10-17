@@ -39,10 +39,28 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
           zIndex: 1
         }} 
       />
-      
+
       {/* Layer 2 - Secondary static layer (always visible) */}
       <div 
         className="bg-layer-2"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url('/highlight_${colorName}.svg')`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          zIndex: 2,
+          opacity: 0.5
+        }} 
+      />
+      
+      {/* Layer 2 - Secondary static layer (always visible) */}
+      <div 
+        className="bg-layer-3"
         style={{
           position: 'absolute',
           top: 0,
@@ -53,14 +71,14 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
           backgroundSize: '130%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
-          zIndex: 2,
+          zIndex: 3,
           opacity: 0.8
         }} 
       />
       
       {/* Layer 3 - Color-based layer (changes with currentColor) */}
       <div 
-        className="bg-layer-3"
+        className="bg-layer-4"
         style={{
           position: 'absolute',
           top: "-17vw",
@@ -71,7 +89,7 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
           backgroundSize: '116%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
-          zIndex: 3,
+          zIndex: 4,
           transition: 'opacity 0.5s ease-in-out',
           opacity: 0.6
         }} 
@@ -79,7 +97,7 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
       
       {/* Layer 4 - Turn-based layer (changes with turn and color) */}
       <div 
-        className="bg-layer-4"
+        className="bg-layer-5"
         style={{
           position: 'absolute',
           top: "-3vw",
@@ -90,7 +108,7 @@ const GameBackground = ({ turn, currentColor, currentUser }) => {
           backgroundSize: '142%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
-          zIndex: 4,
+          zIndex: 5,
           transition: 'opacity 0.5s ease-in-out',
           opacity: 0.9
         }} 
