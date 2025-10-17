@@ -3,6 +3,7 @@ import socket from "../../services/socket";
 import MemoizedHeader from "./Header";
 import CenterInfo from "./CenterInfo";
 import GameScreen from "./GameScreen";
+import GameBackground from "./GameBackground";
 import { PACK_OF_CARDS, ACTION_CARDS } from "../../utils/packOfCards";
 import shuffleArray from "../../utils/shuffleArray";
 import { useSoundProvider } from "../../context/SoundProvider";
@@ -1037,7 +1038,8 @@ const Game = ({ room, currentUser, isComputerMode = false }) => {
   const cleanedTurn = turn == currentUser ? "current" : "opponent"
 
   return (
-    <div className={`backgroundColor${currentColor}${cleanedTurn}`}>
+    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <GameBackground turn={turn} currentColor={currentColor} currentUser={currentUser} />
       {/* <MemoizedHeader roomCode={room} /> */}
       {!gameOver ? (
         <>

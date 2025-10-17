@@ -16,7 +16,7 @@ const MainPlayerView = ({
         justifyContent: "center",
         alignItems: "flex-end",
         padding: "0.5rem",
-        minHeight: "8rem",
+        minHeight: "7rem",
         position: "relative"
       }}>
         {playerDeck.map((item, i) => {
@@ -39,7 +39,9 @@ const MainPlayerView = ({
                 ':hover': {
                   transform: isPlayable ? `rotate(${cardAngle}deg) translateY(-10px)` : `rotate(${cardAngle}deg)`,
                   zIndex: 100 + i
-                }
+                },
+                zoom: turn != mainPlayer ? "0.88":"1.04",
+                filter: turn === mainPlayer ? "brightness(0.9)": ""
               }}
             >
               <img

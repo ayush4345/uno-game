@@ -388,7 +388,7 @@ const GameScreen = ({
           className="player-section"
           style={{
             marginTop: "1rem",
-            paddingBottom: "80px"
+            paddingBottom: "126px"
           }}
         >
           <div
@@ -397,6 +397,10 @@ const GameScreen = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              position: "absolute",
+              bottom: "38px",
+              left: "50%",
+              transform: "translateX(-50%)"
             }}
           >
             <div style={{ display: "flex", alignItems: "center" }}>
@@ -460,14 +464,14 @@ const GameScreen = ({
                   style={{
                     backgroundColor: "rgba(76, 29, 29, 0.95)",
                     borderRadius: "1.5rem",
-                    padding: "0.5rem 1.5rem",
+                    padding: "0.5rem 1rem",
                     color: "white",
-                    fontSize: "1.25rem",
-                    fontWeight: "bold",
+                    fontSize: "0.75rem",
+                    fontWeight: "lighter",
                     letterSpacing: "0.1em",
                     fontFamily: "monospace",
                     textAlign: "center",
-                    minWidth: "120px",
+                    minWidth: "80px",
                     visibility: turn === currentUser ? "visible" : "hidden",
                   }}
                 >
