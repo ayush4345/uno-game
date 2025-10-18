@@ -322,7 +322,7 @@ const GameScreen = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              marginBottom: "-40px"
+              marginBottom: "20px"
             }}
           >
             <CommonView
